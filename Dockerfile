@@ -36,9 +36,9 @@ WORKDIR /home/user
 RUN git clone https://github.com/gafusion/gacode.git
 
 #Copy platform files and simulation run scripts into image
-COPY exec.LINUX_DOCKER /home/user/gacode/platform/exec/exec.LINUX_DOCKER
-COPY make.inc.LINUX_DOCKER /home/user/gacode/platform/build/make.inc.LINUX_DOCKER
-COPY run_simulation.sh /home/user/run_simulation.sh
+COPY src/platform/exec.LINUX_DOCKER /home/user/gacode/platform/exec/exec.LINUX_DOCKER
+COPY src/platform/make.inc.LINUX_DOCKER /home/user/gacode/platform/build/make.inc.LINUX_DOCKER
+COPY src/run_simulation.sh /home/user/run_simulation.sh
 
 #Set environment variables and paths for tglf and cgyro compilation
 RUN echo "export GACODE_PLATFORM=LINUX_DOCKER" >> /../../etc/environment && \
