@@ -1,5 +1,7 @@
 FROM --platform=linux/amd64 ubuntu:24.04
 
+RUN apt update && apt install -y make rsync git vim
+
 #Download necessary libraries
 RUN apt-get update && apt-get -y upgrade && apt-get install -y \
   build-essential \
@@ -33,7 +35,19 @@ RUN rm -rf /var/lib/apt/lists/* && \
 
 WORKDIR /home/user
 
+#Clone this repo 
+RUN git clone --depth=1 https://github.com/zclawr/gacode-docker.git && \
+    cd ./gacode-docker && \
+    git submodule update --init --recursive
+
+#Clone gacode in preparation for compiling TGLF and CGYRO simulation binaries
 RUN git clone https://github.com/gafusion/gacode.git
+
+# Install conda environment
+RUN conda update --all
+RUN conda install mamba -c conda-forge
+RUN mamba env create -n ai-fusion-gacode-simulation --file environment.yml
+RUN conda clean -qafy
 
 #Copy platform files and simulation run scripts into image
 COPY src/platform/exec.LINUX_DOCKER /home/user/gacode/platform/exec/exec.LINUX_DOCKER
@@ -56,8 +70,17 @@ RUN . /home/user/gacode/shared/bin/gacode_setup && \
     make && \
     cd ../
 
-#Run simulation script
-ENTRYPOINT ["./run_simulation.sh"] 
+# Activate the new conda environment and install poetry
+SHELL ["/opt/conda/bin/conda", "run", "-n", "ai-fusion-gacode-simulation", "/bin/bash", "-c"]
+RUN poetry lock
+RUN poetry install --no-root
+RUN conda install orjson
+
+# Run simulation script
+RUN ./run_simulation.sh
+
+# #Run simulation script
+# ENTRYPOINT ["./run_simulation.sh"] 
 
 #NOTES: ---------------
 #This only compiles TGLF and CGYRO simulation code; I was having issues with netcdf for some of the other

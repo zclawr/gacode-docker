@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "ai-fusion-gacode-simulation"
+version = "0.1.0"
+description = ""
+authors = ["zclawr <zclawrence@ucsd.edu>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+pyyaml = "^6.0.2"
+requests = "^2.32.4"
+boto3 = "^1.38.42"
+s5cmd = "^0.2.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
