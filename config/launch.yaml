@@ -1,0 +1,25 @@
+project_name: ai-fusion-gacode-simulation
+model:
+  tglf:
+    command: >-
+      [](make download file=<s3path>;) bash src/run_container_simulation.sh tglf <s3path>
+    gpu_count: 0
+    cpu_count: 1
+    ephemeral_storage: 1
+    memory: 1  # 8GiB
+    image: gitlab-registry.nrp-nautilus.io/zclawrence/gacode-simulation
+  cgyro:
+    command: >-
+      [](make download file=<s3path>;) bash src/run_container_simulation.sh cgyro <s3path>
+    gpu_count: 3
+    cpu_count: 6
+    ephemeral_storage: 1
+    memory: 8  # 8GiB
+    # image: # gitlab-registry.nrp-nautilus.io/prp/jupyter-stack/minimal
+dataset:
+  default:
+    hparam:
+      _s3path: gacode/
+run:
+  model: [tglf]
+  dataset: [default]
