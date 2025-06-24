@@ -7,5 +7,5 @@ echo "dataset:
     hparam:
       _s3path: $2
 run:
-  model: [$1]
+  model: [tglf]
   dataset: [default]" >> ./launch.yml

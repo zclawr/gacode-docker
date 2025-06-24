@@ -74,7 +74,6 @@ RUN . /home/user/gacode/shared/bin/gacode_setup && \
     cd ../
 
 WORKDIR /home/user/gacode-docker
-ENTRYPOINT ["tail", "-f", "/dev/null"]
 
 # IN TESTING: ----------
 # ENTRYPOINT ["tail", "-f", "/dev/null"]
