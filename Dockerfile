@@ -75,15 +75,6 @@ RUN . /home/user/gacode/shared/bin/gacode_setup && \
 
 WORKDIR /home/user/gacode-docker
 
-# IN TESTING: ----------
-# ENTRYPOINT ["tail", "-f", "/dev/null"]
-
-# Run simulation script
-# RUN ./run_simulation.sh
-
-# #Run simulation script
-# ENTRYPOINT ["./run_simulation.sh"] 
-
 #NOTES: ---------------
 #This only compiles TGLF and CGYRO simulation code; I was having issues with netcdf for some of the other
 #simulators. I'm not going to spend time compiling other simulators unless they become necessary.
