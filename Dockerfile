@@ -73,9 +73,8 @@ RUN . /home/user/gacode/shared/bin/gacode_setup && \
     make && \
     cd ../
 
-# Activate the virtual environment and run poetry lock
 WORKDIR /home/user/gacode-docker
-SHELL [".", "./.venv/bin/activate"]
+ENTRYPOINT ["tail", "-f", "/dev/null"]
 
 # IN TESTING: ----------
 # ENTRYPOINT ["tail", "-f", "/dev/null"]
