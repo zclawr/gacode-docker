@@ -1,4 +1,12 @@
+# Environment variables (sensitive)
 .env
+
+# Build artifacts
 /build
+
+# Submodules (see https://github.com/Rose-STL-Lab/Zihao-s-Toolbox)
 /src/toolbox/*
+
+# Virtual environment stuff
+/.venv
 /venv

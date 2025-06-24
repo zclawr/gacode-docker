@@ -35,20 +35,21 @@ RUN rm -rf /var/lib/apt/lists/* && \
     mkdir /home/user && \
     mkdir /home/user/sim
 
-#Clone this repo 
+WORKDIR /home/user
+
+#Clone this repo
 RUN git clone --depth=1 https://github.com/zclawr/gacode-docker.git && \
     cd ./gacode-docker && \
     git submodule update --init --recursive
-  
+ 
 # Install create virtual environment and install pip packages
 WORKDIR /home/user/gacode-docker
-RUN python -m venv .venv
-RUN . .venv/bin/activate
-RUN pip install -r requirements.txt
-
-WORKDIR /home/user
+RUN python -m venv .venv && \
+    . ./.venv/bin/activate && \
+    pip install -r requirements.txt
 
 #Clone gacode in preparation for compiling TGLF and CGYRO simulation binaries
+WORKDIR /home/user
 RUN git clone https://github.com/gafusion/gacode.git
 
 #Copy platform files and simulation run scripts into image
@@ -57,27 +58,27 @@ COPY src/platform/make.inc.LINUX_DOCKER /home/user/gacode/platform/build/make.in
 COPY src/run_simulation.sh /home/user/run_simulation.sh
 
 #Set environment variables and paths for tglf and cgyro compilation
-# RUN echo "export GACODE_PLATFORM=LINUX_DOCKER" >> /../../etc/environment && \
-#     echo "export GACODE_ROOT=/home/user/gacode" >> /../../etc/environment && \
-#     echo "export export OMPI_ALLOW_RUN_AS_ROOT=1" >> /../../etc/environment && \
-#     echo "export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1" >> /../../etc/environment && \
-#     chmod +x /home/user/run_simulation.sh
+RUN echo "export GACODE_PLATFORM=LINUX_DOCKER" >> /../../etc/environment && \
+    echo "export GACODE_ROOT=/home/user/gacode" >> /../../etc/environment && \
+    echo "export export OMPI_ALLOW_RUN_AS_ROOT=1" >> /../../etc/environment && \
+    echo "export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1" >> /../../etc/environment && \
+    chmod +x /home/user/run_simulation.sh
 
 # #Compile tglf and cgyro binaries
-# RUN . /home/user/gacode/shared/bin/gacode_setup && \
-#     . /etc/environment && \
-#     cd gacode/cgyro && \
-#     make && \ 
-#     cd ../tglf && \
-#     make && \
-#     cd ../
+RUN . /home/user/gacode/shared/bin/gacode_setup && \
+    . /etc/environment && \
+    cd gacode/cgyro && \
+    make && \ 
+    cd ../tglf && \
+    make && \
+    cd ../
 
-ENTRYPOINT ["tail", "-f", "/dev/null"]
-# Activate the new conda environment and install poetry
-# SHELL ["/opt/conda/bin/conda", "run", "-n", "ai-fusion-gacode-simulation", "/bin/bash", "-c"]
-# RUN poetry lock
-# RUN poetry install --no-root
-# RUN conda install orjson
+# Activate the virtual environment and run poetry lock
+WORKDIR /home/user/gacode-docker
+SHELL [".", "./.venv/bin/activate"]
+
+# IN TESTING: ----------
+# ENTRYPOINT ["tail", "-f", "/dev/null"]
 
 # Run simulation script
 # RUN ./run_simulation.sh

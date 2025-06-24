@@ -2,3 +2,4 @@ pyyaml
 requests
 boto3
 s5cmd
+poetry
