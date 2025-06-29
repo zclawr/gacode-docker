@@ -1,34 +1,53 @@
 # gacode-docker
 
-In order to run regression tests with the GACode simulators, run the following:
+This repository contains scripts for running Gacode simulations (TGLF or CGYRO) in Kubernetes jobs designed for the Nautilus cluster, which uses the [Zihao's Toolbox](https://github.com/Rose-STL-Lab/Zihao-s-Toolbox) repository for S3 utility functions and job scheduling. 
 
-## Building and running the Docker image
-Run the following in the root directory of this repository:
-```
-docker build -t gacode-docker .
-docker run gacode-docker
-```
-This will cause the container to run with an open terminal, which will not close until the container is stopped.
+## Running a simulation job
 
-## Running regressions tests
-In order to run the regression tests, execute the following commands in the docker container. I recommend navigating to the Docker container you ran in the command above through Docker Desktop, and going to the Exec tab on that container. From there, you can run these commands in the terminal. If you would prefer to run this from a CLI without Docker Desktop involved, you can use ```docker exec ...``` (see [Docker documentation](https://docs.docker.com/reference/cli/docker/container/exec/) for more).
+In order to run a simulation job, make sure that the ```username``` field in ```config/kube.yaml``` contains your username on the Nautilus cluster. 
 
+Also create a ```.env``` file in the root directory containing S3 bucket specifics and any required credentials for a private bucket. The bucket name and endpoint URL fields are required:
 ```
-. /etc/environment
-. $GACODE_ROOT/shared/bin/gacode_setup
-tglf -r
-cgyro -r -n 4 -nomp 2
+S3_BUCKET_NAME= ...
+S3_ENDPOINT_URL= ...
+# Only necessary if bucket is private
+AWS_ACCESS_KEY_ID= ...
+AWS_SECRET_ACCESS_KEY= ...
 ```
 
-The first two commands are necessary to propagate environment variables into the terminal.
+The code flow for the simulation job is as follows:
+- Download inputs from specified S3 path, from an S3 bucket specified in ```.env```
+- Run the inputs through TGLF or CGYRO, depending on which simulator is specified in the args for ```run_simulation_job.sh```
+- Upload outputs back to S3 at the same path that they were downloaded from. This respects any pre-existing directory structure at the S3 path.
 
-## Troubleshooting
-If you run into the error: ```/bin/sh: 1: tglf: not found```, it is likely that the terminal you are executing commands from does not have necessary environment variables available to it. If you have indeed run the above commands for running regression tests, try running the following in your terminal to manually add the necessary environment variables:
+To run the simulation job, run the following command from the root directory:
 ```
-export GACODE_PLATFORM=LINUX_DOCKER
-export GACODE_ROOT=/home/user/gacode
-export export OMPI_ALLOW_RUN_AS_ROOT=1
-export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
-. $GACODE_ROOT/shared/bin/gacode_setup
+bash ./run_simulation_job.sh <tglf OR cgyro> <s3path>
 ```
-From here, try running the regression tests again.
+
+Where ```s3path``` is a path in the S3 bucket to inputs for simulation. Currently, the Docker image that runs the simulation jobs expects the following directory structure (consider ```batch-001``` to stored in the root directory of the bucket, although this doesn't have to be the case): 
+```
+- batch-001
+    - tglf
+        - input-001
+            - input.tglf
+        - input-002
+            - input.tglf
+        ...
+    - cgyro
+        - input-001
+            - input.cgyro
+        - input-002
+            - input.cgyro
+        ...
+```
+
+In order to run all of these inputs, then, you could execute the following from the root directory:
+```
+bash ./run_simulation_job.sh tglf batch-001/tglf/
+bash ./run_simulation_job.sh cgyro batch-001/cgyro/
+```
+
+This will make two separate Nautilus jobs, one of which will run TGLF, and therefore will not request any GPU resources, and one of which will run CGYRO, and therefore will request GPU resources. Each of these jobs will simulate all of the inputs in their respective directories (```~/tglf/``` or ```~/cgyro/```).
+
+Notice that there is no leading slash on the S3 path, but there is a trailing slash. This is important for the S3 utils pathing.
