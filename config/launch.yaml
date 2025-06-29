@@ -19,7 +19,7 @@ model:
 dataset:
   default:
     hparam:
-      _s3path: gacode/batch-001/
+      _s3path: gacode/batch-001/tglf/
 run:
   model: [tglf]
   dataset: [default]
