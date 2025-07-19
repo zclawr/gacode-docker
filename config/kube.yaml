@@ -1,5 +1,5 @@
 project_name: ai-fusion-gacode-simulation
-namespace: ai-fusion-ga # default (for local testing)
+namespace: ai-fusion-ga # default (for local testing), ai-fusion-ga (for remote on Nautilus)
 user: zclawrence
 
 ## Image pull related
@@ -9,7 +9,7 @@ image: gitlab-registry.nrp-nautilus.io/zclawrence/gacode-simulation:latest
 startup_script: . ./.venv/bin/activate
 
 hostname_whitelist:
-  # - localhost (for local testing)
+  # - localhost # (for local testing)
   - gpu-02.csusb.edu
   - nautilus01.hsrn.nyu.edu
   # - hcc-nrp-shor-c5226.unl.edu

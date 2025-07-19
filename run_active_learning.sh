@@ -27,3 +27,5 @@ kubectl wait --for=condition=complete job --selector=project=ai-fusion-gacode-si
 # Mock BAL run
 echo "Ready for active learning with inputs at the s3 path: gacode/batch-001/"
 
+bash ./run_training_checkpoint.sh gacode/batch-001/tglf/ gacode/batch-002/tglf/
+

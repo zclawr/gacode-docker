@@ -41,7 +41,7 @@ WORKDIR /home/user
 RUN git clone --depth=1 https://github.com/zclawr/gacode-docker.git && \
     cd ./gacode-docker && \
     git submodule update --init --recursive
- 
+
 # Install create virtual environment and install pip packages
 WORKDIR /home/user/gacode-docker
 RUN python -m venv .venv && \
@@ -73,7 +73,8 @@ RUN . /home/user/gacode/shared/bin/gacode_setup && \
     make && \
     cd ../
 
-WORKDIR /home/user/gacode-docker
+# WORKDIR /home/user/gacode-docker
+ENTRYPOINT ["sleep", "infinity"]
 
 #NOTES: ---------------
 #This only compiles TGLF and CGYRO simulation code; I was having issues with netcdf for some of the other

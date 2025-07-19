@@ -11,7 +11,7 @@ model:
   cgyro:
     command: >-
       [](. ./.venv/bin/activate; make download file=<s3path>;) . ./.venv/bin/activate; bash src/run_simulation.sh cgyro <s3path>; make upload file=<s3path>
-    gpu_count: 3
+    gpu_count: 2
     cpu_count: 4
     ephemeral_storage: 1
     memory: 8
