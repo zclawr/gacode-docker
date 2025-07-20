@@ -73,8 +73,8 @@ RUN . /home/user/gacode/shared/bin/gacode_setup && \
     make && \
     cd ../
 
-# WORKDIR /home/user/gacode-docker
-ENTRYPOINT ["sleep", "infinity"]
+WORKDIR /home/user/gacode-docker
+# ENTRYPOINT ["sleep", "infinity"]
 
 #NOTES: ---------------
 #This only compiles TGLF and CGYRO simulation code; I was having issues with netcdf for some of the other
