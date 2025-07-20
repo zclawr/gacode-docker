@@ -2,7 +2,9 @@
 # run_simulation.sh script parameters: 
 # $1 : simulation type [tglf, cgyro]
 # $2 : path to input folder
-
+. /etc/environment
+. $GACODE_ROOT/shared/bin/gacode_setup
+. ./.venv/bin/activate
 # function parameters:
 # $1 : simulation type [tglf, cgyro]
 # $2 : simulation directory (must contain input.tglf or input.cgyro)
@@ -28,3 +30,5 @@ do
   echo "Processing directory: $dir"
   run_simulation $1 $dir # outputs are stored in subdirs per input
 done
+# Upload results to S3
+make upload file=$2
