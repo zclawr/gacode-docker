@@ -2,8 +2,6 @@
 # run_simulation.sh script parameters: 
 # $1 : simulation type [tglf, cgyro]
 # $2 : path to input folder
-. /etc/environment
-. $GACODE_ROOT/shared/bin/gacode_setup
 
 # function parameters:
 # $1 : simulation type [tglf, cgyro]
