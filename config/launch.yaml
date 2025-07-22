@@ -1,0 +1,25 @@
+project_name: ai-fusion-gacode-simulation
+model:
+  tglf:
+    command: >-
+      [](. ./.venv/bin/activate; make download file=<s3path>;) bash src/run_simulation.sh tglf <s3path>
+    gpu_count: 0
+    cpu_count: 1
+    ephemeral_storage: 1
+    memory: 2
+    image: gitlab-registry.nrp-nautilus.io/zclawrence/gacode-simulation:latest
+  cgyro:
+    command: >-
+      [](. ./.venv/bin/activate; make download file=<s3path>;) bash src/run_simulation.sh cgyro <s3path>
+    gpu_count: 2
+    cpu_count: 4
+    ephemeral_storage: 1
+    memory: 8
+    image: gitlab-registry.nrp-nautilus.io/zclawrence/gacode-simulation:latest
+dataset:
+  default:
+    hparam:
+      _s3path: ["inputs/20250721_222451/batch-000/","inputs/20250721_222451/batch-001/","inputs/20250721_222451/batch-002/","inputs/20250721_222451/batch-003/","inputs/20250721_222451/batch-004/","inputs/20250721_222451/batch-005/","inputs/20250721_222451/batch-006/","inputs/20250721_222451/batch-007/","inputs/20250721_222451/batch-008/","inputs/20250721_222451/batch-009/"]
+run:
+  model: [cgyro]
+  dataset: [default]

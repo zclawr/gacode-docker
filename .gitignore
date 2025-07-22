@@ -10,3 +10,5 @@
 # Virtual environment stuff
 /.venv
 /venv
+
+/cgyro_inputs
