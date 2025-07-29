@@ -20,36 +20,61 @@ fi
 SIM_TYPE=$1
 LOCAL_INPUT_DIR=$2
 
+if [[ "$SIM_TYPE" != "tglf" && "$SIM_TYPE" != "cgyro" ]]; then
+  echo "❌ SIM_TYPE must be 'tglf' or 'cgyro'"
+  exit 1
+fi
+
 if [[ ! -d "$LOCAL_INPUT_DIR" ]]; then
   echo "❌ Provided path $LOCAL_INPUT_DIR is not a directory."
   exit 1
 fi
 
-# === Setup base path in S3 ===
+# === Setup run folder and S3 path ===
 DATE_TAG=$(date +"%Y%m%d_%H%M%S")
-S3_BASE="inputs/${DATE_TAG}/"
+RUN_DIR="runs/${DATE_TAG}"
+mkdir -p "$RUN_DIR"
+S3_BASE="cgyro-inputs-wesley/${DATE_TAG}/"
 
-echo "📤 Uploading contents of $LOCAL_INPUT_DIR to s3://${S3_BUCKET_NAME}/${S3_BASE}"
+echo "📤 Uploading $SIM_TYPE inputs from $LOCAL_INPUT_DIR to s3://${S3_BUCKET_NAME}/${S3_BASE}"
+export AWS_S3_SIGNATURE_VERSION=s3v4
 
-# === Upload subdirs and collect full s3 paths ===
 S3PATH_LIST=()
 
-for subdir in "$LOCAL_INPUT_DIR"/*; do
-  if [[ -d "$subdir" ]]; then
-    name=$(basename "$subdir")
-    echo "📦 Uploading $name..."
-    aws s3 cp "$subdir" "s3://${S3_BUCKET_NAME}/${S3_BASE}${name}/" \
-      --recursive --endpoint-url "$S3_ENDPOINT_URL"
-    S3PATH_LIST+=("\"${S3_BASE}${name}/\"")
+for batch_dir in "$LOCAL_INPUT_DIR"/batch-*; do
+  sim_dir="$batch_dir/$SIM_TYPE"
+  if [[ -d "$sim_dir" ]]; then
+    valid_input_found=false
+    for input_dir in "$sim_dir"/input-*; do
+      if [[ "$SIM_TYPE" == "cgyro" && -f "$input_dir/input.cgyro" ]] || \
+         [[ "$SIM_TYPE" == "tglf" && -f "$input_dir/input.tglf" ]]; then
+        valid_input_found=true
+        break
+      fi
+    done
+
+    if $valid_input_found; then
+      REL_PATH="${sim_dir#$LOCAL_INPUT_DIR/}"
+      echo "📦 Syncing $REL_PATH..."
+      aws s3 sync "$sim_dir" "s3://${S3_BUCKET_NAME}/${S3_BASE}${REL_PATH}/" \
+        --exclude "*" --include "input-*/input.${SIM_TYPE}" \
+        --endpoint-url "$S3_ENDPOINT_URL" --no-verify-ssl
+
+      S3PATH_LIST+=("\"${S3_BASE}${REL_PATH}/\"")
+    else
+      echo "⏩ Skipping $sim_dir (no valid input files)"
+    fi
   fi
 done
 
-# === Join for YAML array ===
+# === Create launch.yaml and metadata ===
 JOINED_PATHS=$(IFS=, ; echo "${S3PATH_LIST[*]}")
+YAML_ARCHIVE="$RUN_DIR/launch_${SIM_TYPE}.yaml"
+YAML_CONFIG="./config/launch.yaml"
 
-# === Generate launch.yaml ===
-cp ./config/launch_template.yaml ./config/launch.yaml
-cat >> ./config/launch.yaml <<EOF
+for TARGET_YAML in "$YAML_ARCHIVE" "$YAML_CONFIG"; do
+  cp ./config/launch_template.yaml "$TARGET_YAML"
+  cat >> "$TARGET_YAML" <<EOF
 dataset:
   default:
     hparam:
@@ -58,6 +83,12 @@ run:
   model: [${SIM_TYPE}]
   dataset: [default]
 EOF
+done
 
-echo "✅ launch.yaml created with ${#S3PATH_LIST[@]} S3 paths"
+
+
+printf "%s\n" "${S3PATH_LIST[@]}" > "$RUN_DIR/s3paths_${SIM_TYPE}.txt"
+
+echo "✅ Saved launch YAML to $YAML_PATH"
+
 make job

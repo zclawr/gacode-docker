@@ -12,14 +12,14 @@ model:
     command: >-
       [](. ./.venv/bin/activate; make download file=<s3path>;) bash src/run_simulation.sh cgyro <s3path>
     gpu_count: 2
-    cpu_count: 4
-    ephemeral_storage: 1
+    cpu_count: 16
+    ephemeral_storage: 50
     memory: 8
     image: gitlab-registry.nrp-nautilus.io/zclawrence/gacode-simulation:latest
 dataset:
   default:
     hparam:
-      _s3path: ["inputs/20250721_222451/batch-000/","inputs/20250721_222451/batch-001/","inputs/20250721_222451/batch-002/","inputs/20250721_222451/batch-003/","inputs/20250721_222451/batch-004/","inputs/20250721_222451/batch-005/","inputs/20250721_222451/batch-006/","inputs/20250721_222451/batch-007/","inputs/20250721_222451/batch-008/","inputs/20250721_222451/batch-009/"]
+      _s3path: ["cgyro-inputs-wesley/20250729_000014/batch-000/tglf/","cgyro-inputs-wesley/20250729_000014/batch-001/tglf/","cgyro-inputs-wesley/20250729_000014/batch-002/tglf/","cgyro-inputs-wesley/20250729_000014/batch-003/tglf/","cgyro-inputs-wesley/20250729_000014/batch-004/tglf/","cgyro-inputs-wesley/20250729_000014/batch-005/tglf/","cgyro-inputs-wesley/20250729_000014/batch-006/tglf/","cgyro-inputs-wesley/20250729_000014/batch-007/tglf/","cgyro-inputs-wesley/20250729_000014/batch-008/tglf/","cgyro-inputs-wesley/20250729_000014/batch-009/tglf/"]
 run:
-  model: [cgyro]
+  model: [tglf]
   dataset: [default]

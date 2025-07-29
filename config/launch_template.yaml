@@ -12,7 +12,7 @@ model:
     command: >-
       [](. ./.venv/bin/activate; make download file=<s3path>;) bash src/run_simulation.sh cgyro <s3path>
     gpu_count: 2
-    cpu_count: 4
-    ephemeral_storage: 1
+    cpu_count: 16
+    ephemeral_storage: 50
     memory: 8
     image: gitlab-registry.nrp-nautilus.io/zclawrence/gacode-simulation:latest

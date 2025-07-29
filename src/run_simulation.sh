@@ -17,7 +17,7 @@ function run_simulation {
     elif [[ $1 == "cgyro" ]]; then
         echo "Beginning CGYRO at $2"
         cgyro -i $2
-        cgyro -e $2
+        cgyro -e $2 -n 32 -nomp 4
         echo "Finished CGYRO at $2"
     fi
 }
