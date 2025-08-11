@@ -57,7 +57,6 @@ for batch_dir in "$LOCAL_INPUT_DIR"/batch-*; do
       REL_PATH="${sim_dir#$LOCAL_INPUT_DIR/}"
       echo "📦 Syncing $REL_PATH..."
       aws s3 sync "$sim_dir" "s3://${S3_BUCKET_NAME}/${S3_BASE}${REL_PATH}/" \
-        --exclude "*" --include "input-*/input.${SIM_TYPE}" \
         --endpoint-url "$S3_ENDPOINT_URL" --no-verify-ssl
 
       S3PATH_LIST+=("\"${S3_BASE}${REL_PATH}/\"")
