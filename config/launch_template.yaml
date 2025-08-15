@@ -15,4 +15,4 @@ model:
     cpu_count: 16
     ephemeral_storage: 50
     memory: 8
-    image: gitlab-registry.nrp-nautilus.io/zclawrence/gacode-simulation:latest
+    image: gitlab-registry.nrp-nautilus.io/wesleyliu728/gacode-simulation:latest

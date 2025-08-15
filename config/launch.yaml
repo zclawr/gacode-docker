@@ -12,14 +12,14 @@ model:
     command: >-
       [](. ./.venv/bin/activate; make download file=<s3path>;) bash src/run_simulation.sh cgyro <s3path>
     gpu_count: 2
-    cpu_count: 16
-    ephemeral_storage: 50
+    cpu_count: 32
+    ephemeral_storage: 20
     memory: 8
-    image: gitlab-registry.nrp-nautilus.io/zclawrence/gacode-simulation:latest
+    image: gitlab-registry.nrp-nautilus.io/wesleyliu728/gacode-simulation:latest
 dataset:
   default:
     hparam:
-      _s3path: ["cgyro-inputs-wesley/20250729_000014/batch-000/tglf/","cgyro-inputs-wesley/20250729_000014/batch-001/tglf/","cgyro-inputs-wesley/20250729_000014/batch-002/tglf/","cgyro-inputs-wesley/20250729_000014/batch-003/tglf/","cgyro-inputs-wesley/20250729_000014/batch-004/tglf/","cgyro-inputs-wesley/20250729_000014/batch-005/tglf/","cgyro-inputs-wesley/20250729_000014/batch-006/tglf/","cgyro-inputs-wesley/20250729_000014/batch-007/tglf/","cgyro-inputs-wesley/20250729_000014/batch-008/tglf/","cgyro-inputs-wesley/20250729_000014/batch-009/tglf/"]
+      _s3path: ["cgyro-inputs-wesley/20250729_173414/batch-000/cgyro/","cgyro-inputs-wesley/20250729_173414/batch-001/cgyro/","cgyro-inputs-wesley/20250729_173414/batch-002/cgyro/","cgyro-inputs-wesley/20250729_173414/batch-003/cgyro/","cgyro-inputs-wesley/20250729_173414/batch-004/cgyro/","cgyro-inputs-wesley/20250729_173414/batch-005/cgyro/","cgyro-inputs-wesley/20250729_173414/batch-006/cgyro/","cgyro-inputs-wesley/20250729_173414/batch-007/cgyro/","cgyro-inputs-wesley/20250729_173414/batch-008/cgyro/","cgyro-inputs-wesley/20250729_173414/batch-009/cgyro/"]
 run:
-  model: [tglf]
+  model: [cgyro]
   dataset: [default]

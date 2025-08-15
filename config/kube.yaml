@@ -3,7 +3,7 @@ namespace: ai-fusion-ga # default (for local testing), ai-fusion-ga (for remote 
 user: zclawrence
 
 ## Image pull related
-image: gitlab-registry.nrp-nautilus.io/zclawrence/gacode-simulation:latest
+image: gitlab-registry.nrp-nautilus.io/wesleyliu728/gacode-simulation
 
 ## If startup_script is not explicitly specified, the script will automatically pull the latest git repo using ssh_host and ssh_port, and activate the default environment using conda_home and conda_env_name.
 startup_script: . ./.venv/bin/activate
@@ -25,12 +25,19 @@ hostname_whitelist:
   - knuron.calit2.optiputer.net
   - prp01.ifa.hawaii.edu
   - nautilus-ext-gpu01.fullerton.edu
+  - csusb-sci-103-11.csusb.edu
   - ry-gpu-14.sdsc.optiputer.net
   - ry-gpu-01.sdsc.optiputer.net
   - ry-gpu-02.sdsc.optiputer.net
   - ry-gpu-03.sdsc.optiputer.net
   - ry-gpu-04.sdsc.optiputer.net
   - ry-gpu-05.sdsc.optiputer.net
+  - k8s-3090-01.clemson.edu
+  - suncave-12
+  - suncave-14
+  - suncave-2
+  - suncave-8
+  - suncave-9
   - ry-gpu-06.sdsc.optiputer.net
   - ry-gpu-08.sdsc.optiputer.net
   - ry-gpu-12.sdsc.optiputer.net
@@ -38,6 +45,7 @@ hostname_whitelist:
   - k8s-3090-02.clemson.edu
   # - fiona-1.famu.edu
   - hcc-chase-shor-c4715.unl.edu
+  - hcc-chase-shor-c4705.unl.edu
   - hcc-chase-shor-c4709.unl.edu
   - ry-gpu-04.sdsc.optiputer.net
   - ry-gpu-10.sdsc.optiputer.net
@@ -71,3 +79,26 @@ hostname_whitelist:
   - tu.gp-engine.greatplains.net
   # - uicnrp-fiona2.evl.uic.edu
   - nrp-fiona-001.sdmz.amnh.org
+
+#2080s
+  - k8s-haosu-16.sdsc.optiputer.net
+  - k8s-haosu-02.sdsc.optiputer.net
+  - k8s-haosu-09.sdsc.optiputer.net
+  - k8s-haosu-18.sdsc.optiputer.net
+  - k8s-gpu-2.ucr.edu
+  - k8s-haosu-03.sdsc.optiputer.net
+  - k8s-haosu-12.sdsc.optiputer.net
+  - nrp-g1.nysernet.org
+  - epic001.clemson.edu
+  - k8s-haosu-20.sdsc.optiputer.net
+  - k8s-haosu-22.sdsc.optiputer.net
+  - fiona-prg1.cesnet.cz
+  - k8s-gpu-3.ucr.edu
+  - k8s-haosu-10.sdsc.optiputer.net
+  - k8s-haosu-11.sdsc.optiputer.net
+  - k8s-haosu-17.sdsc.optiputer.net
+  - k8s-haosu-19.sdsc.optiputer.net
+  - k8s-haosu-04.sdsc.optiputer.net
+  - k8s-haosu-07.sdsc.optiputer.net
+  - k8s-haosu-23.sdsc.optiputer.net
+  - k8s-haosu-06.sdsc.optiputer.net

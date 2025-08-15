@@ -112,15 +112,16 @@ FIXED_TRAILER_TEMPLATE = textwrap.dedent("""\
 import re
 
 CGYRO_CONSTANTS = {
-    # 'N_ENERGY': 8,
-    # 'N_XI': 24,
-    # 'N_THETA': 24,
-    # 'N_RADIAL': 16,
+    'N_ENERGY': 8,
+    'N_XI': 24,
+    'N_THETA': 24,
+    'N_RADIAL': 16,
     'N_TOROIDAL': 1,
     'NONLINEAR_FLAG': 0,
     'BOX_SIZE': 1,
     'DELTA_T': 0.005,   # will be overwritten based on KY
-    'MAX_TIME': 100000.0,
+    'MAX_TIME': 1000.0,
+    'DELTA_T_METHOD': 1,
     'PRINT_STEP': 100,  # will be overwritten based on KY
     'THETA_PLOT': 1,
 }
