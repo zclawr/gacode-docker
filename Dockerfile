@@ -42,11 +42,57 @@ RUN git clone --depth=1 https://github.com/zclawr/gacode-docker.git && \
     cd ./gacode-docker && \
     git submodule update --init --recursive
 
-# Install create virtual environment and install pip packages
+# Download and install Miniconda
+RUN cd ../ && curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -o /tmp/miniconda.sh && \
+    bash /tmp/miniconda.sh -bfp /usr/local && \
+    rm -rf /tmp/miniconda.sh
+
+# Add Conda to the PATH
+ENV PATH="/usr/local/bin:${PATH}"
+
+# Accept Conda TOS 
+RUN conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main && \
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+
+# Update Conda and clean up
+RUN conda update -y conda && \
+    conda clean --all --yes
+
+# Create and init conda environment
 WORKDIR /home/user/gacode-docker
-RUN python -m venv .venv && \
-    . ./.venv/bin/activate && \
-    pip install -r requirements.txt
+RUN conda create -n gacode
+
+# Conda run acts as a workaround for conda activate
+SHELL ["conda", "run", "-n", "gacode", "/bin/bash", "-c"]
+RUN pip install -r requirements.txt
+
+WORKDIR /
+# Copy over private key, and set permissions
+# Warning! Anyone who gets their hands on this image will be able
+# to retrieve this private key file from the corresponding image layer
+RUN mkdir -p /root/.ssh
+ADD /.ssh/id_rsa /root/.ssh/id_rsa
+ADD /.ssh/id_rsa.pub /root/.ssh/id_rsa.pub
+ADD /.ssh/known_hosts /root/.ssh/known_hosts
+
+# Create known_hosts
+RUN ssh-keyscan -t ed25519 github.com >> /root/.ssh/known_hosts
+
+# Remove host checking
+RUN echo "Host github.com\n\tStrictHostKeyChecking no\n" >> /root/.ssh/config
+
+# Update permissions
+RUN chmod 400 /root/.ssh/id_rsa
+RUN chmod 400 /root/.ssh/config
+RUN chmod 400 /root/.ssh/known_hosts
+
+WORKDIR /home/user/
+#Clone scheduler repo for input/output processing (requires conda install to setup environment)
+RUN git clone --depth=1 https://github.com/zclawr/ai-fusion-bal-scheduler.git && \
+    cd ./ai-fusion-bal-scheduler && \
+    git submodule update --init --recursive && \
+    cd ./src/output_parsing/ && \ 
+    bash setup.sh
 
 #Clone gacode in preparation for compiling TGLF and CGYRO simulation binaries
 WORKDIR /home/user
@@ -74,6 +120,8 @@ RUN . /home/user/gacode/shared/bin/gacode_setup && \
     cd ../
 
 WORKDIR /home/user/gacode-docker
+
+# Comment this if you want to test the docker container
 # ENTRYPOINT ["sleep", "infinity"]
 
 #NOTES: ---------------
