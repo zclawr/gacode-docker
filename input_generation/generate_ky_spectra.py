@@ -358,7 +358,7 @@ def save_h5(out_path: str, inputs_mat: np.ndarray, ky_mat: np.ndarray, grad_r0: 
         f.attrs["NS"] = GLOBAL_CONST["NS"]
 
 if __name__ == "__main__":
-    npy_file = "/Users/wesleyliu/Documents/Github/gacode-docker/top10k_jacobnorm_candidates_sampled_normal.npy"
+    npy_file = "input_generation/samples_10k_minmax_normal.npy"
     grad_r0 = 1.23314445670738
 
     data = load_npy_or_npz(npy_file)
@@ -367,6 +367,6 @@ if __name__ == "__main__":
     print(f"Computed ky for {ky_mat.shape[0]} samples, skipped {len(skipped_idx)}.")
     print(f"ky shape: {ky_mat.shape}")
 
-    out_h5 = "./out_10k.h5"
+    out_h5 = "./out_10k_minmax_norm.h5"
     save_h5(out_h5, inputs_kept, ky_mat, grad_r0, kept_idx, skipped_idx)
     print(f"Wrote HDF5: {out_h5}")

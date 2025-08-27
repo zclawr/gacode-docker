@@ -288,6 +288,6 @@ def convert_h5_to_batch_dir(h5_path, out_root="all_batches"):
 
 
 # === Run ===
-h5_file = "./input_generation/sampled_output_file.h5"  # Replace with your actual file path
+h5_file = "/Users/wesleyliu/Documents/Github/gacode-docker/out_52_300_minmax_norm.h5"  # Replace with your actual file path
 output_dir = "./cgyro_inputs"
 convert_h5_to_batch_dir(h5_file, output_dir)
