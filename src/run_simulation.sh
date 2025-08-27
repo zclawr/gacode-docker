@@ -30,5 +30,14 @@ do
   echo "Processing directory: $dir"
   run_simulation $1 $dir # outputs are stored in subdirs per input
 done
+
+conda init
+
+source ~/.bashrc
+
+conda activate omfit-classes-only
+
+python /home/user/ai-fusion-bal-scheduler/parse_and_save_outputs.py -d $2/../../ -o $2
+
 # Upload results to S3
 make upload file=$2
