@@ -10,7 +10,7 @@ model:
     image: gitlab-registry.nrp-nautilus.io/zclawrence/gacode-simulation:latest
   cgyro:
     command: >-
-      [](conda init; source ~/.bashrc; conda env create -f environment.yml; conda activate ai-fusion-gacode-simulation; poetry install; make download file=<s3path>;) bash src/run_simulation.sh cgyro <s3path>
+      [](conda init; source ~/.bashrc; conda env create -f environment.yml; conda activate ai-fusion-gacode-simulation; poetry install; make download file=<s3path>;) bash src/run_simulation.sh cgyro <s3path>; conda activate omfit-classes-only; python /home/user/ai-fusion-bal-scheduler/src/parse_and_save_outputs.py -d <s3path>/../../ -o <s3path>; tar -cJvf <s3path>/compressed_outputs.tar.xz <s3path>; make upload file=<s3path>/compressed_outputs.tar.xz
     gpu_count: 0
     cpu_count: 32
     ephemeral_storage: 50

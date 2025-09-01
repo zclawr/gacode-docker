@@ -31,13 +31,5 @@ do
   run_simulation $1 $dir # outputs are stored in subdirs per input
 done
 
-conda init bash
-exec bash
-conda activate gacode
-
-conda activate omfit-classes-only
-
-python /home/user/ai-fusion-bal-scheduler/src/parse_and_save_outputs.py -d $2/../../ -o $2
-
 # Upload results to S3
 make upload file=$2
