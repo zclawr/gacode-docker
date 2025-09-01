@@ -4,7 +4,7 @@
 # $2 : path to input folder
 . /etc/environment
 . $GACODE_ROOT/shared/bin/gacode_setup
-. ./.venv/bin/activate
+# . ./.venv/bin/activate
 # function parameters:
 # $1 : simulation type [tglf, cgyro]
 # $2 : simulation directory (must contain input.tglf or input.cgyro)
@@ -31,13 +31,13 @@ do
   run_simulation $1 $dir # outputs are stored in subdirs per input
 done
 
-conda init
-
-source ~/.bashrc
+conda init bash
+exec bash
+conda activate gacode
 
 conda activate omfit-classes-only
 
-python /home/user/ai-fusion-bal-scheduler/parse_and_save_outputs.py -d $2/../../ -o $2
+python /home/user/ai-fusion-bal-scheduler/src/parse_and_save_outputs.py -d $2/../../ -o $2
 
 # Upload results to S3
 make upload file=$2

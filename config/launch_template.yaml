@@ -10,7 +10,7 @@ model:
     image: gitlab-registry.nrp-nautilus.io/zclawrence/gacode-simulation:latest
   cgyro:
     command: >-
-      [](. ./.venv/bin/activate; make download file=<s3path>;) bash src/run_simulation.sh cgyro <s3path>
+      [](conda init; source ~/.bashrc; conda env create -f environment.yml; conda activate ai-fusion-gacode-simulation; poetry install; make download file=<s3path>;) bash src/run_simulation.sh cgyro <s3path>
     gpu_count: 0
     cpu_count: 32
     ephemeral_storage: 50
