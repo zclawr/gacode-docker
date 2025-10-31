@@ -135,7 +135,7 @@ if __name__ == "__main__":
         dest_path = os.path.join(dest, 'input.tglf')
         shutil.copy(files[0], dest_path)
         print(f"File '{files[0]}' copied successfully to '{dest_path}'")
-        refactor_tglf_file(dest_path, TGLF_KEYS_FOR_REMOVAL, TGLF_KEYS_TO_REPLACE)
+        refactor_tglf_file(dest_path, TGLF_KEYS_FOR_REMOVAL, TGLF_KEYS_TO_REPLACE, TGLF_KEYS_TO_ADD)
         print(f'Refactored TGLF file at {dest_path}')
     except FileExistsError:
         print(f"Error: Destination directory '{dest}' already exists.")
