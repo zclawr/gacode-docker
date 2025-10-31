@@ -23,7 +23,8 @@ TGLF_KEYS_FOR_REMOVAL = [
     'SHAPE_S_COS0',
     'SHAPE_S_COS1',
     'SHAPE_S_COS2',
-    'KY'
+    'KY',
+    'N_MODES'
 ]
 
 TGLF_KEYS_TO_REPLACE = {
@@ -31,6 +32,10 @@ TGLF_KEYS_TO_REPLACE = {
     'USE_BPAR': 'F',
     'WRITE_WAVEFUNCTION_FLAG': 1,
     'NKY': 24
+}
+
+TGLF_KEYS_TO_ADD = {
+    'NMODES': 5
 }
 import os
 from typing import List
@@ -52,7 +57,7 @@ def get_all_files_recursively(root_dir):
             file_paths.append(full_path)
     return file_paths
 
-def refactor_tglf_file(filepath: str, prefixes_to_remove: List[str], to_replace: dict):
+def refactor_tglf_file(filepath: str, prefixes_to_remove: List[str], to_replace: dict, to_add: dict):
     """
     Reads TGLF file, removes any lines that start with a string found in
     the prefixes_to_remove list, replaces entries with keys in the to_replace_list, 
@@ -98,7 +103,9 @@ def refactor_tglf_file(filepath: str, prefixes_to_remove: List[str], to_replace:
             
             elif should_replace:
                 filtered_lines.append(r_key + " = " + str(r_val) + '\n')
-
+        
+        for key in to_add.keys():
+            filtered_lines.append(key + " = " + str(to_add[key]) + '\n')
         # 3. Write the filtered content back to the original file (overwriting it)
         with open(filepath, 'w') as f:
             f.writelines(filtered_lines)

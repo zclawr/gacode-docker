@@ -9,7 +9,7 @@ user: zclawrence
 # ephemeral_storage: 300
 
 ## Image pull related
-image: gitlab-registry.nrp-nautilus.io/wesleyliu728/gacode-simulation
+image: gitlab-registry.nrp-nautilus.io/zclawrence/gacode-simulation:latest
 
 ## If startup_script is not explicitly specified, the script will automatically pull the latest git repo using ssh_host and ssh_port, and activate the default environment using conda_home and conda_env_name.
 # startup_script: . ./.venv/bin/activate

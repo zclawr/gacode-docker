@@ -2,7 +2,7 @@ project_name: ai-fusion-gacode-simulation
 model:
   tglf:
     command: >-
-      [](conda init; source ~/.bashrc; conda env create -f environment.yml; conda activate ai-fusion-gacode-simulation; poetry install; make download file=<s3path>;) python format_tglf -s <s3path> -d <s3path>/../tglf_simready; bash src/run_simulation.sh tglf <s3path>/../tglf_simready; cp tglf_make upload file=<s3path>; make upload file=<s3path>/../tglf_simready
+      [](conda init; source ~/.bashrc; conda env create -f environment.yml; conda activate ai-fusion-gacode-simulation; poetry install; make download file=<s3path>;) python format_tglf -s <s3path> -d <s3path>/../tglf_simready; bash src/run_simulation.sh tglf <s3path>/../tglf_simready; make upload file=<s3path>/../tglf_simready
     gpu_count: 0
     cpu_count: 2
     ephemeral_storage: 5
@@ -15,7 +15,13 @@ model:
     cpu_count: 32
     ephemeral_storage: 50
     memory: 4
+    image: gitlab-registry.nrp-nautilus.io/wesleyliu728/gacode-simulation:latest
   cgyro_then_tglf:
     command: >-
-      [](conda init; source ~/.bashrc; conda env create -f environment.yml; conda activate ai-fusion-gacode-simulation; poetry install; make download file=<s3path>;) bash src/run_simulation.sh cgyro <s3path>/cgyro; conda activate omfit-classes-only; python /home/user/ai-fusion-bal-scheduler/src/parse_and_save_outputs.py -d <s3path>/cgyro/../../ -o <s3path>; tar -cJvf <s3path>/cgyro/compressed_outputs.tar.xz <s3path>/cgyro; make upload file=<s3path>/cgyro/compressed_outputs.tar.xz; python format_tglf -s <s3path>/tglf -d <s3path>/tglf/../tglf_simready; bash src/run_simulation.sh tglf <s3path>/tglf/../tglf_simready; cp tglf_make upload file=<s3path>/tglf; make upload file=<s3path>/tglf/../tglf_simready
+      [](conda init; source ~/.bashrc; conda env create -f environment.yml; conda activate ai-fusion-gacode-simulation; poetry install; make download file=<s3path>;) bash src/run_simulation.sh cgyro <s3path>/cgyro; conda activate omfit-classes-only; python /home/user/ai-fusion-bal-scheduler/src/parse_and_save_outputs.py -d <s3path>/cgyro/../../ -o <s3path>; tar -cJvf <s3path>/cgyro/compressed_outputs.tar.xz <s3path>/cgyro; make upload file=<s3path>/cgyro/compressed_outputs.tar.xz; python format_tglf -s <s3path>/tglf -d <s3path>/tglf/../tglf_simready; bash src/run_simulation.sh tglf <s3path>/tglf/../tglf_simready; make upload file=<s3path>/tglf/../tglf_simready
+       gpu_count: 0
+    gpu_count: 0
+    cpu_count: 32
+    ephemeral_storage: 50
+    memory: 4
     image: gitlab-registry.nrp-nautilus.io/wesleyliu728/gacode-simulation:latest
