@@ -38,7 +38,7 @@ RUN rm -rf /var/lib/apt/lists/* && \
 WORKDIR /home/user
 
 #Clone this repo
-RUN git clone --depth=1 --branch input_gen https://github.com/zclawr/gacode-docker.git && \
+RUN git clone --depth=1 --branch main https://github.com/zclawr/gacode-docker.git && \
     cd ./gacode-docker && \
     git pull && \
     git submodule update --init --recursive

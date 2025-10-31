@@ -35,6 +35,23 @@ TGLF_KEYS_TO_REPLACE = {
 import os
 from typing import List
 
+def get_all_files_recursively(root_dir):
+    """
+    Recursively retrieves a list of all file paths within a given directory.
+
+    Args:
+        root_dir (str): The path to the root directory to start the search from.
+
+    Returns:
+        list: A list of absolute paths to all files found.
+    """
+    file_paths = []
+    for dirpath, dirnames, filenames in os.walk(root_dir):
+        for filename in filenames:
+            full_path = os.path.join(dirpath, filename)
+            file_paths.append(full_path)
+    return file_paths
+
 def refactor_tglf_file(filepath: str, prefixes_to_remove: List[str], to_replace: dict):
     """
     Reads TGLF file, removes any lines that start with a string found in
@@ -69,18 +86,18 @@ def refactor_tglf_file(filepath: str, prefixes_to_remove: List[str], to_replace:
             should_remove = any(stripped_line.startswith(prefix.upper()) for prefix in prefixes_to_remove)
             r_key= None
             r_val = None
-            for prefix in to_replace.keys:
+            for prefix in to_replace.keys():
                 should_replace = stripped_line.startswith(prefix.upper())
                 if should_replace:
                     r_key = prefix
                     r_val = to_replace[prefix]
                     break
 
-            if not should_remove:
+            if not should_remove and not should_replace:
                 filtered_lines.append(line)
             
-            if should_replace:
-                filtered_lines.append(r_key + " = " + r_val)
+            elif should_replace:
+                filtered_lines.append(r_key + " = " + str(r_val) + '\n')
 
         # 3. Write the filtered content back to the original file (overwriting it)
         with open(filepath, 'w') as f:
@@ -101,13 +118,18 @@ if __name__ == "__main__":
     args = parser.parse_args()
     source = args.source_dir
     dest = args.destination_dir
+
+    os.makedirs(dest, exist_ok=True)
+
     try:
-        shutil.copytree(source, dest)
-        print(f"Directory '{source}' successfully copied to '{dest}'.")
-        _, _, files = os.walk(dest)
-        for file in files:
-            refactor_tglf_file(file, TGLF_KEYS_FOR_REMOVAL, TGLF_KEYS_TO_REPLACE)
-            print(f'Refactored TGLF file at {file}')
+        files = get_all_files_recursively(source)
+        print(len(files))
+        # Copy the file
+        dest_path = os.path.join(dest, 'input.tglf')
+        shutil.copy(files[0], dest_path)
+        print(f"File '{files[0]}' copied successfully to '{dest_path}'")
+        refactor_tglf_file(dest_path, TGLF_KEYS_FOR_REMOVAL, TGLF_KEYS_TO_REPLACE)
+        print(f'Refactored TGLF file at {dest_path}')
     except FileExistsError:
         print(f"Error: Destination directory '{dest}' already exists.")
     except Exception as e:
