@@ -38,8 +38,9 @@ RUN rm -rf /var/lib/apt/lists/* && \
 WORKDIR /home/user
 
 #Clone this repo
-RUN git clone --depth=1 https://github.com/zclawr/gacode-docker.git && \
+RUN git clone --depth=1 --branch input_gen https://github.com/zclawr/gacode-docker.git && \
     cd ./gacode-docker && \
+    git pull && \
     git submodule update --init --recursive
 
 # Download and install Miniconda
@@ -88,8 +89,9 @@ RUN chmod 400 /root/.ssh/known_hosts
 
 WORKDIR /home/user/
 #Clone scheduler repo for input/output processing (requires conda install to setup environment)
-RUN git clone --depth=1 https://github.com/zclawr/ai-fusion-bal-scheduler.git && \
+RUN git clone --depth=1 --branch docker-fix https://github.com/zclawr/ai-fusion-bal-scheduler.git && \
     cd ./ai-fusion-bal-scheduler && \
+    git pull && \
     git submodule update --init --recursive && \
     cd ./src/output_parsing/ && \ 
     bash setup.sh

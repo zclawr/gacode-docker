@@ -4,7 +4,7 @@
 # $2 : path to input folder
 . /etc/environment
 . $GACODE_ROOT/shared/bin/gacode_setup
-. ./.venv/bin/activate
+# . ./.venv/bin/activate
 # function parameters:
 # $1 : simulation type [tglf, cgyro]
 # $2 : simulation directory (must contain input.tglf or input.cgyro)
@@ -17,7 +17,7 @@ function run_simulation {
     elif [[ $1 == "cgyro" ]]; then
         echo "Beginning CGYRO at $2"
         cgyro -i $2
-        cgyro -e $2
+        cgyro -e $2 -n 8 -nomp 4
         echo "Finished CGYRO at $2"
     fi
 }
@@ -30,5 +30,6 @@ do
   echo "Processing directory: $dir"
   run_simulation $1 $dir # outputs are stored in subdirs per input
 done
+
 # Upload results to S3
 make upload file=$2

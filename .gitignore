@@ -8,5 +8,10 @@
 /.venv
 /venv
 
+/cgyro_inputs
+/test_data
+/test_data_new
+
+/runs
 # SSH keys for OMFIT-source pull
 .ssh
