@@ -1,6 +1,8 @@
 import argparse
 import shutil
 import os
+from typing import List
+from pathlib import Path
 
 TGLF_KEYS_FOR_REMOVAL = [
     'BT_EXP',
@@ -37,8 +39,22 @@ TGLF_KEYS_TO_REPLACE = {
 TGLF_KEYS_TO_ADD = {
     'NMODES': 5
 }
-import os
-from typing import List
+
+def get_child_directories_at_depth_1(path_str):
+    """
+    Returns a list of immediate child directories (depth 1) for a given path.
+
+    Args:
+        path_str (str): The path to the parent directory.
+
+    Returns:
+        list: A list of Path objects representing the child directories.
+    """
+    parent_path = Path(path_str)
+    child_directories = [
+        item.name for item in parent_path.iterdir() if item.is_dir()
+    ]
+    return child_directories
 
 def get_all_files_recursively(root_dir):
     """
@@ -110,8 +126,6 @@ def refactor_tglf_file(filepath: str, prefixes_to_remove: List[str], to_replace:
         with open(filepath, 'w') as f:
             f.writelines(filtered_lines)
 
-        print(f"Successfully processed and updated file: {filepath}")
-
     except IOError as e:
         print(f"An error occurred while reading or writing the file: {e}")
     except Exception as e:
@@ -128,16 +142,43 @@ if __name__ == "__main__":
 
     os.makedirs(dest, exist_ok=True)
 
-    try:
-        files = get_all_files_recursively(source)
-        print(len(files))
-        # Copy the file
-        dest_path = os.path.join(dest, 'input.tglf')
-        shutil.copy(files[0], dest_path)
-        print(f"File '{files[0]}' copied successfully to '{dest_path}'")
-        refactor_tglf_file(dest_path, TGLF_KEYS_FOR_REMOVAL, TGLF_KEYS_TO_REPLACE, TGLF_KEYS_TO_ADD)
-        print(f'Refactored TGLF file at {dest_path}')
-    except FileExistsError:
-        print(f"Error: Destination directory '{dest}' already exists.")
-    except Exception as e:
-        print(f"An error occurred: {e}")
+    # Source directory structure is expected to be as follows:
+    # source/
+    #   - batch-000/
+    #       - cgyro/
+    #       - tglf/
+    #           - input-000/
+    #               - input.tglf
+    #           - input-001/ 
+    #               - input.tglf
+    #           - ... (per ky)
+    #    - batch-001/
+    #    - ... (per physical condition)
+
+    # Destination directory structure will be as follows on success:
+    # dest/
+    #   - batch-000/
+    #       - input.tglf
+    #   - batch-001/
+    #       - input.tglf
+    #   - ... (per physical condition)
+
+    # You can then run "bash run_simulation.sh tglf dest" and this SHOULD work
+
+    batch_dirs = get_child_directories_at_depth_1(source)
+    for batch_dir in batch_dirs:
+        batch_name = batch_dir.split('/')[-1]
+        tglf_batch_dir = os.path.join(source, os.path.join(batch_dir, 'tglf'))
+        try:
+            files = get_all_files_recursively(tglf_batch_dir)
+            # Copy the file
+            dest_dir = os.path.join(dest, batch_name)
+            os.makedirs(dest_dir, exist_ok=True)
+            dest_path = os.path.join(dest_dir, 'input.tglf')
+            shutil.copy(files[0], dest_path)
+            refactor_tglf_file(dest_path, TGLF_KEYS_FOR_REMOVAL, TGLF_KEYS_TO_REPLACE, TGLF_KEYS_TO_ADD)
+            print(f'Refactored TGLF file at {dest_path}')
+        except FileExistsError:
+            print(f"Error: Destination directory '{dest}' already exists.")
+        except Exception as e:
+            print(f"An error occurred: {e}")
