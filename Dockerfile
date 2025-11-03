@@ -124,7 +124,7 @@ RUN . /home/user/gacode/shared/bin/gacode_setup && \
 WORKDIR /home/user/gacode-docker
 
 # Comment this if you want to test the docker container
-# ENTRYPOINT ["sleep", "infinity"]
+#ENTRYPOINT ["sleep", "infinity"]
 
 #NOTES: ---------------
 #This only compiles TGLF and CGYRO simulation code; I was having issues with netcdf for some of the other
