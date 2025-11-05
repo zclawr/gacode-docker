@@ -15,3 +15,6 @@
 /runs
 # SSH keys for OMFIT-source pull
 .ssh
+
+*/__pycache__
+*/OMFIT-source
