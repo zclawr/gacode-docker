@@ -75,8 +75,10 @@ RUN chmod 400 /root/.ssh/known_hosts
 
 WORKDIR /home/user/
 
+## NOTE: BRANCH IS SET TO ONLINE FOR TESTING PURPOSES
+
 #Clone this repo and set up conda env (requires conda install)
-RUN git clone --depth=1 --branch main https://github.com/zclawr/gacode-docker.git && \
+RUN git clone --depth=1 --branch online https://github.com/zclawr/gacode-docker.git && \
     cd ./gacode-docker && \
     git pull && \
     git submodule update --init --recursive && \ 
