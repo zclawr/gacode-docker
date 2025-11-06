@@ -82,7 +82,7 @@ RUN git clone --depth=1 --branch online https://github.com/zclawr/gacode-docker.
     cd ./gacode-docker && \
     git pull && \
     git submodule update --init --recursive && \ 
-    cd ./src/output_parsing/ && \ 
+    cd ./output_parsing/ && \ 
     bash setup.sh
 
 #Clone gacode in preparation for compiling TGLF and CGYRO simulation binaries
