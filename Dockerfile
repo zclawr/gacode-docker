@@ -37,12 +37,6 @@ RUN rm -rf /var/lib/apt/lists/* && \
 
 WORKDIR /home/user
 
-#Clone this repo
-RUN git clone --depth=1 --branch main https://github.com/zclawr/gacode-docker.git && \
-    cd ./gacode-docker && \
-    git pull && \
-    git submodule update --init --recursive
-
 # Download and install Miniconda
 RUN cd ../ && curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -o /tmp/miniconda.sh && \
     bash /tmp/miniconda.sh -bfp /usr/local && \
@@ -58,14 +52,6 @@ RUN conda tos accept --override-channels --channel https://repo.anaconda.com/pkg
 # Update Conda and clean up
 RUN conda update -y conda && \
     conda clean --all --yes
-
-# Create and init conda environment
-WORKDIR /home/user/gacode-docker
-RUN conda create -n gacode
-
-# Conda run acts as a workaround for conda activate
-SHELL ["conda", "run", "-n", "gacode", "/bin/bash", "-c"]
-RUN pip install -r requirements.txt
 
 WORKDIR /
 # Copy over private key, and set permissions
@@ -88,11 +74,12 @@ RUN chmod 400 /root/.ssh/config
 RUN chmod 400 /root/.ssh/known_hosts
 
 WORKDIR /home/user/
-#Clone scheduler repo for input/output processing (requires conda install to setup environment)
-RUN git clone --depth=1 --branch docker-fix https://github.com/zclawr/ai-fusion-bal-scheduler.git && \
-    cd ./ai-fusion-bal-scheduler && \
+
+#Clone this repo and set up conda env (requires conda install)
+RUN git clone --depth=1 --branch main https://github.com/zclawr/gacode-docker.git && \
+    cd ./gacode-docker && \
     git pull && \
-    git submodule update --init --recursive && \
+    git submodule update --init --recursive && \ 
     cd ./src/output_parsing/ && \ 
     bash setup.sh
 
@@ -124,7 +111,7 @@ RUN . /home/user/gacode/shared/bin/gacode_setup && \
 WORKDIR /home/user/gacode-docker
 
 # Comment this if you want to test the docker container
-#ENTRYPOINT ["sleep", "infinity"]
+ENTRYPOINT ["sleep", "infinity"]
 
 #NOTES: ---------------
 #This only compiles TGLF and CGYRO simulation code; I was having issues with netcdf for some of the other
