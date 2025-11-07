@@ -2,11 +2,20 @@
 name = "ai-fusion-gacode-simulation"
 version = "0.1.0"
 description = ""
-authors = ["zclawr <zclawrence@ucsd.edu>"]
+authors = ["Your Name <you@example.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.11"
+omfit-classes = { path = "./OMFIT-source/omfit", develop = true }
+numpy = "1.26.4"
+uncertainties = "^3.2.3"
+pexpect = "^4.9.0"
+scipy = "^1.16.0"
+omas = "^0.94.2"
+xarray = "^2025.7.0"
+matplotlib = "^3.10.3"
+pygacode = "^1.0.1"
 pyyaml = "^6.0.2"
 requests = "^2.32.4"
 boto3 = "^1.38.42"
