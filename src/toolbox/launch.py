@@ -44,6 +44,12 @@ def check_type(key, value, expected_type):
     if expected_type is Any:
         return
 
+    if expected_type is bool and isinstance(value, str):
+        if value.lower() in ("true", "1", "yes", "y"):
+            return  # treat as valid
+        elif value.lower() in ("false", "0", "no", "n"):
+            return
+
     # Check if we're dealing with a Union type.
     if get_origin(expected_type) is Union:
         # Iterate over the types in the Union and pass if any type matches.

@@ -119,13 +119,13 @@ import re
 
 CGYRO_CONSTANTS = {
     'N_ENERGY': 8,
-    'N_XI': 24,
+    'N_XI': 16,
     'N_THETA': 24,
-    'N_RADIAL': 16,
+    'N_RADIAL': 8,
     'N_TOROIDAL': 1,
     'NONLINEAR_FLAG': 0,
     'BOX_SIZE': 1,
-    'DELTA_T': 0.005,   # will be overwritten based on KY
+    'DELTA_T': 0.01,   # will be overwritten based on KY
     'MAX_TIME': 1000.0,
     'DELTA_T_METHOD': 1,
     'PRINT_STEP': 100,  # will be overwritten based on KY
@@ -334,57 +334,102 @@ def _worker_task(h5_path, sample_idx, ky_idx, out_root):
         return (sample_idx, ky_idx, repr(e))
 
 
-def convert_h5_to_batch_dir_parallel(
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from functools import partial
+from tqdm import tqdm
+import os
+
+def _chunks(iterable, size):
+    """Yield successive chunks (lists) of given size from iterable."""
+    buf = []
+    for x in iterable:
+        buf.append(x)
+        if len(buf) >= size:
+            yield buf
+            buf = []
+    if buf:
+        yield buf
+
+def convert_h5_to_batch_dir_batched(
     h5_path,
     out_root="all_batches",
+    batch_size_samples=25,   # how many sample indices per batch
     max_workers=None,
-    chunksize=1
 ):
     """
-    Parallel version. One (sample_idx, ky_idx) per task.
-    - max_workers: defaults to os.cpu_count() - 1 (or 1 if that would be 0)
-    - chunksize: task submission chunk size (fine to leave at 1)
+    Batched parallel writer:
+      - Splits [0..n_samples) into batches of size 'batch_size_samples'
+      - For each batch, submits all (sample_idx, ky_idx) tasks for that batch,
+        waits for completion, then moves to next batch.
     """
     os.makedirs(out_root, exist_ok=True)
 
-    # probe dimensions
+    # Probe dims once
     with h5py.File(h5_path, "r") as f:
         n_samples, n_ky = f["ky"].shape
 
-    # sensible default for CPU count
+    # Reasonable default for workers
     if max_workers is None:
         cpu = os.cpu_count() or 2
         max_workers = max(1, cpu - 1)
 
-    tasks = [(s, k) for s in range(n_samples) for k in range(n_ky)]
-    total = len(tasks)
+    # Build list of sample indices and split into batches
+    all_samples = list(range(n_samples))
+    total_tasks = n_samples * n_ky
+
+    print(f"Will write {total_tasks} inputs "
+          f"({n_samples} samples × {n_ky} ky) "
+          f"in batches of {batch_size_samples} samples, "
+          f"max_workers={max_workers}.")
 
     worker = partial(_worker_task, h5_path, out_root=out_root)
-
     errors = []
-    with ProcessPoolExecutor(max_workers=max_workers) as ex:
-        futures = [ex.submit(worker, s, k) for (s, k) in tasks]
+    tasks_done = 0
 
-        for fut in tqdm(as_completed(futures), total=total, desc="Writing TGLF/CGYRO"):
-            s, k, err = fut.result()
-            if err is not None:
-                errors.append((s, k, err))
+    for sample_batch in _chunks(all_samples, batch_size_samples):
+        # Build this batch's (sample, ky) tasks
+        batch_tasks = [(s, k) for s in sample_batch for k in range(n_ky)]
+        batch_total = len(batch_tasks)
+
+        # New pool per batch keeps in-flight futures bounded
+        with ProcessPoolExecutor(max_workers=max_workers) as ex:
+            futures = [ex.submit(worker, s, k) for (s, k) in batch_tasks]
+
+            for fut in tqdm(
+                as_completed(futures),
+                total=batch_total,
+                desc=f"Batch {sample_batch[0]}–{sample_batch[-1]}",
+                leave=False,
+            ):
+                s, k, err = fut.result()
+                tasks_done += 1
+                if err is not None:
+                    errors.append((s, k, err))
+
+        # Optional: print a small checkpoint per batch
+        print(f"✓ Finished samples {sample_batch[0]}–{sample_batch[-1]} "
+              f"({tasks_done}/{total_tasks})")
 
     if errors:
         print("⚠️ Some tasks failed:")
-        for s, k, err in errors[:20]:  # cap output
+        for s, k, err in errors[:20]:
             print(f"  sample {s}, ky {k}: {err}")
         if len(errors) > 20:
             print(f"  ... and {len(errors) - 20} more")
     else:
-        print(f"✅ Done. All {total} inputs written under: {out_root}")
+        print(f"✅ Done. All {total_tasks} inputs written under: {out_root}")
 
 
-# === Run (parallel) ===
+# === Run (batched) ===
 if __name__ == "__main__":
-    h5_file = "/Users/wesleyliu/Documents/Github/gacode-docker/tglf_data_sampled_42_50.h5"  # <- your path
-    output_dir = "./cgyro_inputs"
-    convert_h5_to_batch_dir_parallel(h5_file, output_dir)
+    h5_file = "/Users/wesleyliu/Documents/Github/gacode-docker/out_10k_minmax_norm_rho_0.8_49_50.h5"
+    output_dir = "./cgyro_inputs_fast"
+    convert_h5_to_batch_dir_batched(
+        h5_file,
+        output_dir,
+        batch_size_samples=25,  # tune this up/down based on RAM
+        max_workers=None        # or set explicitly, e.g., 8
+    )
 
 
 # # === Run ===

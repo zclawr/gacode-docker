@@ -10,21 +10,10 @@ user: zclawrence
 
 ## Image pull related
 image: gitlab-registry.nrp-nautilus.io/wesleyliu728/gacode-simulation
-
+tolerations:
+  - "nautilus.io/ceph"
 ## If startup_script is not explicitly specified, the script will automatically pull the latest git repo using ssh_host and ssh_port, and activate the default environment using conda_home and conda_env_name.
 # startup_script: . ./.venv/bin/activate
-
-priority_class_name: opportunistic
-
-affinity:
-  nodeAffinity:
-    requiredDuringSchedulingIgnoredDuringExecution:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: feature.node.kubernetes.io/pci-10de.present
-          operator: NotIn
-          values:
-          - "true"
 
 # hostname_whitelist:
 #   # - localhost # (for local testing)

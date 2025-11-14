@@ -6,7 +6,7 @@ import subprocess
 import json
 from copy import deepcopy
 import inspect
-from typing import List, Dict, Any, get_type_hints
+from typing import List, Dict, Any, get_type_hints, Optional
 import os
 import base64
 import sys
@@ -459,6 +459,10 @@ def create_config(
     # Extra background server for the command
     server: Dict[str, Any] = {},
 
+    # NEW: scheduling knobs
+    priority_class_name: Optional[str] = None,
+    cpu_only: bool = False,
+
     # Omit undefined kwargs
     **ignored
 ):
@@ -698,6 +702,33 @@ fi
         ]
     }
 
+    # === NEW: resolve env-based defaults for scheduling knobs ===
+    if priority_class_name is None and os.getenv("KUBE_OPPORTUNISTIC") == "1":
+        priority_class_name = "opportunistic"
+    if not cpu_only and os.getenv("KUBE_CPU_ONLY") == "1":
+        cpu_only = True
+
+    # === NEW: inject scheduling knobs ===
+    if priority_class_name:
+        # For Pods, it will go under spec.priorityClassName;
+        # for Jobs, we set it on the shared template and it ends up in spec.template.spec.priorityClassName.
+        template.setdefault("priorityClassName", priority_class_name)
+
+    if cpu_only:
+        na = template.setdefault("affinity", {}).setdefault("nodeAffinity", {})
+        req = na.setdefault("requiredDuringSchedulingIgnoredDuringExecution", {})
+        terms = req.setdefault("nodeSelectorTerms", [])
+        if not terms:
+            terms.append({"matchExpressions": []})
+        anti_gpu_expr = {
+            "key": "feature.node.kubernetes.io/pci-10de.present",
+            "operator": "NotIn",
+            "values": ["true"]
+        }
+        me = terms[0].setdefault("matchExpressions", [])
+        if anti_gpu_expr not in me:
+            me.append(anti_gpu_expr)
+
     # If affinity is empty
     if (
         len(
@@ -844,8 +875,9 @@ def batch(
         mode=job:          Create jobs in the Kubernetes cluster
         mode=local:        Runs jobs locally
         mode=dryrun:       Only creates the job files without deploying them
-        mode=local-first:  Runs the first job locally
         mode=local-dryrun: Only prints the local commands without running them
+        mode=local-first:  Runs the first job locally
+        mode=pod-dryrun:   (validated above)
     """
     # Initialization
     if project_name is None:

@@ -9,9 +9,16 @@
 /venv
 
 /cgyro_inputs
+/cgyro_inputs_fast
 /test_data
 /test_data_new
 
 /runs
 # SSH keys for OMFIT-source pull
 .ssh
+
+**.h5
+**.npy
+**.json
+OMFIT-source
+

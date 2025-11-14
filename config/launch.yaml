@@ -10,16 +10,20 @@ model:
     image: gitlab-registry.nrp-nautilus.io/zclawrence/gacode-simulation:latest
   cgyro:
     command: >-
-      [](conda init; source ~/.bashrc; conda env create -f environment.yml; conda activate ai-fusion-gacode-simulation; poetry install; make download file=<s3path>;) bash src/run_simulation.sh cgyro <s3path>; conda activate omfit-classes-only; python /home/user/ai-fusion-bal-scheduler/src/parse_and_save_outputs.py -d <s3path>/../../ -o <s3path>; make upload file=<s3path>
+      [](conda shell.bash hook; conda env create -f environment.yml; conda init; source ~/.bashrc; conda activate ai-fusion-gacode-simulation; poetry install; make download file=<s3path>;) bash src/run_simulation.sh cgyro <s3path>; USER=$USER conda run --no-capture-output -n omfit-classes-only python /home/user/ai-fusion-bal-scheduler/src/parse_and_save_outputs.py -d <s3path>../../ -o <s3path>; tar -cJvf <s3path>compressed_outputs.tar.xz <s3path>; make upload file=<s3path>compressed_outputs.tar.xz
     gpu_count: 0
     cpu_count: 32
     ephemeral_storage: 50
-    memory: 4
+    memory: 2
     image: gitlab-registry.nrp-nautilus.io/wesleyliu728/gacode-simulation:latest
+    # config/launch.yaml
+    # priority_class_name: opportunistic 
+    cpu_only: false
+
 dataset:
   default:
     hparam:
-      _s3path: ["cgyro-inputs-wesley/20250901_025721/batch-021/cgyro/"]
+      _s3path: ["cgyro-inputs-wesley-rho-sep/20251111_222010/batch-000/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-001/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-002/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-003/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-004/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-005/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-006/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-007/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-008/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-009/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-010/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-011/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-012/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-013/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-014/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-015/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-016/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-017/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-018/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-019/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-020/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-021/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-022/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-023/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-024/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-025/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-026/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-027/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-028/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-029/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-030/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-031/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-032/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-033/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-034/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-035/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-036/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-037/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-038/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-039/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-040/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-041/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-042/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-043/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-044/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-045/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-046/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-047/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-048/cgyro/","cgyro-inputs-wesley-rho-sep/20251111_222010/batch-049/cgyro/"]
 run:
   model: [cgyro]
   dataset: [default]
