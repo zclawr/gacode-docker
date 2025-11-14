@@ -1,4 +1,4 @@
-name: ai-fusion-gacode-simulation-test
+name: ai-fusion-gacode-simulation
 channels:
   - conda-forge
   - nvidia
