@@ -1,4 +1,4 @@
-name: pyro
+name: omfit-classes-only
 channels:
   - conda-forge
 dependencies:
