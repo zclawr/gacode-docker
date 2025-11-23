@@ -20,6 +20,7 @@ pyyaml = "^6.0.2"
 requests = "^2.32.4"
 boto3 = "^1.38.42"
 s5cmd = "^0.2.0"
+astropy = "^7.1.1"
 
 [build-system]
 requires = ["poetry-core"]
