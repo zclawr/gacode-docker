@@ -2,13 +2,14 @@
 set -e  # exit on error
 set -x  # print commands for debugging
 
+ROOT_DIR=$1
 # -----------------------------
 # 0️⃣ Define absolute paths
 # -----------------------------
-PROJECT_ROOT="$HOME/ai-fusion-cgyro-nn"          # Training pipeline repo
-SCHEDULER_ROOT="$HOME/ai-fusion-bal-scheduler"  # Scheduler repo
-GACODE_ROOT="$HOME/gacode"                       # Simulation binaries
-GACODE_DOCKER_ROOT="$HOME/gacode-docker"        # Platform files repo
+PROJECT_ROOT="$ROOT_DIR/ai-fusion-cgyro-nn"          # Training pipeline repo
+SCHEDULER_ROOT="$ROOT_DIR/ai-fusion-bal-scheduler"  # Scheduler repo
+GACODE_ROOT="$ROOT_DIR/gacode"                       # Simulation binaries
+GACODE_DOCKER_ROOT="$ROOT_DIR/gacode-docker"        # Platform files repo
 
 # -----------------------------
 # 1️⃣ Clone or update gacode-docker (platform files)
