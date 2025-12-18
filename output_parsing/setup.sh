@@ -38,6 +38,6 @@ conda install -c conda-forge openblas lapack fftw
 
 # Step 4: Poetry install
 echo "📦 Installing dependencies using Poetry..."
-poetry install --no-root
+poetry install
 
 echo "✅ Setup complete. You're now in Conda environment '$ENV_NAME'."
