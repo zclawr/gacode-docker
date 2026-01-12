@@ -94,6 +94,10 @@ shopt -s nullglob
 for batch_dir in "$LOCAL_INPUT_DIR"/batch-*; do
   [[ -d "$batch_dir" ]] || continue
 
+  # ---- NEW: compute batch-relative path once, for YAML outer-dir paths ----
+  BATCH_REL="${batch_dir#$LOCAL_INPUT_DIR/}"        # e.g. "batch-0001"
+  YAML_BATCH_PATH="${S3_BASE}${BATCH_REL}/"         # e.g. "cgyro-inputs.../DATE/batch-0001/"
+
   for sim in tglf cgyro; do
     sim_dir="$batch_dir/$sim"
     [[ -d "$sim_dir" ]] || continue
@@ -110,19 +114,19 @@ for batch_dir in "$LOCAL_INPUT_DIR"/batch-*; do
 
     if $valid_input_found; then
       # Build REL_PATH relative to LOCAL_INPUT_DIR (without leading slash)
-      REL_PATH="${sim_dir#$LOCAL_INPUT_DIR/}"
+      REL_PATH="${sim_dir#$LOCAL_INPUT_DIR/}"       # e.g. "batch-0001/cgyro"
 
-      # Destination s3 URL
+      # Destination s3 URL for sync (unchanged: still uploads into .../tglf or .../cgyro/)
       S3_DST="s3://${S3_BUCKET_NAME}/${S3_BASE}${REL_PATH}/"
 
       # Perform sync via s5cmd
       s5_sync_dir "$sim_dir" "$S3_DST"
 
-      # Append to selection lists (quote the path for YAML array)
+      # ---- CHANGED: for YAML, use the *outer* batch dir, not ".../tglf/" or ".../cgyro/" ----
       if [[ "$sim" == "tglf" ]]; then
-        S3PATH_LIST_TGLF+=("\"${S3_BASE}${REL_PATH}/\"")
+        S3PATH_LIST_TGLF+=("\"${YAML_BATCH_PATH}\"")
       else
-        S3PATH_LIST_CGYRO+=("\"${S3_BASE}${REL_PATH}/\"")
+        S3PATH_LIST_CGYRO+=("\"${YAML_BATCH_PATH}\"")
       fi
     else
       echo "⏩ Skipping $sim_dir (no valid input files)"

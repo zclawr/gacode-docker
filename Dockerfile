@@ -78,12 +78,10 @@ WORKDIR /home/user/
 ## NOTE: BRANCH IS SET TO ONLINE FOR TESTING PURPOSES
 
 #Clone this repo and set up conda env (requires conda install)
-RUN git clone --depth=1 --branch online https://github.com/zclawr/gacode-docker.git && \
+RUN git clone --depth=1 --branch input_gen https://github.com/zclawr/gacode-docker.git && \
     cd ./gacode-docker && \
     git pull && \
-    git submodule update --init --recursive && \ 
-    cd ./output_parsing/ && \ 
-    bash setup.sh
+    git submodule update --init --recursive
 
 #Clone gacode in preparation for compiling TGLF and CGYRO simulation binaries
 WORKDIR /home/user

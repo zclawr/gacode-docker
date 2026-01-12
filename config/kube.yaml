@@ -14,6 +14,14 @@ tolerations:
   - "nautilus.io/ceph"
 ## If startup_script is not explicitly specified, the script will automatically pull the latest git repo using ssh_host and ssh_port, and activate the default environment using conda_home and conda_env_name.
 # startup_script: . ./.venv/bin/activate
+hostname_blacklist:
+  - hcc-nrp-shor-c6017.unl.edu
+  - hcc-nrp-shor-c6009.unl.edu
+  - k8s-chase-ci-03.calit2.optiputer.net
+  - nrp-c16.nysernet.org
+  - rci-tide-cpu-03.sdsu.edu  
+  - node-2-7.sdsc.optiputer.net
+  - hcc-nrp-shor-c5809.unl.edu
 
 # hostname_whitelist:
 #   # - localhost # (for local testing)

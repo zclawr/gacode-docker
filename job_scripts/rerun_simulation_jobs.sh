@@ -22,5 +22,5 @@ fi
 for yaml in "${YAML_FILES[@]}"; do
   echo "🔁 Re-running job using $yaml"
   cp "$yaml" ./config/launch.yaml
-  make job overwrite=True
+  make job
 done

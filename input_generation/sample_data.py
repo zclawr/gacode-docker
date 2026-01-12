@@ -113,8 +113,8 @@ def main(json_path: str, out_dir: str, n: int = 10000, seed: int = 42):
 if __name__ == "__main__":
     # === Parameters here ===
     JSON_FILE = "/Users/wesleyliu/Documents/Github/gacode-docker/input_generation/mean_std_with_rho (1).json"
-    OUT_DIR   = "/Users/wesleyliu/Documents/Github/gacode-docker/input_generation/samples_by_rho"
+    OUT_DIR   = "/Users/wesleyliu/Documents/Github/gacode-docker/input_generation/samples_by_rho_new"
     N_SAMPLES = 10000
-    SEED      = 123
+    SEED      = 128
 
     main(JSON_FILE, OUT_DIR, N_SAMPLES, SEED)

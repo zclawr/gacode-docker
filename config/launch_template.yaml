@@ -10,19 +10,19 @@ model:
     image: gitlab-registry.nrp-nautilus.io/zclawrence/gacode-simulation:latest
   cgyro:
     command: >-
-      [](conda shell.bash hook; conda env create -f environment.yml; conda init; source ~/.bashrc; conda activate ai-fusion-gacode-simulation; poetry install; make download file=<s3path>;) bash src/run_simulation.sh cgyro <s3path>; USER=$USER conda run --no-capture-output -n omfit-classes-only python /home/user/ai-fusion-bal-scheduler/src/parse_and_save_outputs.py -d <s3path>../../ -o <s3path>; tar -cJvf <s3path>compressed_outputs.tar.xz <s3path>; make upload file=<s3path>compressed_outputs.tar.xz
+      [](git pull; eval "$(/usr/local/bin/conda shell.bash hook)"; conda env create -f environment.yml; conda activate ai-fusion-gacode-simulation; git clone --branch xarray-fix git@github.com:wesleyliu728/OMFIT-source.git OMFIT-source; poetry install; make download file=<s3path>;) bash src/run_simulation.sh cgyro <s3path>/cgyro; conda activate ai-fusion-gacode-simulation; USER=$USER python -m output_parsing.parse_and_save_outputs -d <s3path>../ -o <s3path>parsed_out.h5; make upload file=<s3path>parsed_out.h5; tar -cJvf <s3path>compressed_outputs.tar.xz <s3path>; make upload file=<s3path>compressed_outputs.tar.xz;
     gpu_count: 0
     cpu_count: 32
     ephemeral_storage: 50
     memory: 2
     image: gitlab-registry.nrp-nautilus.io/wesleyliu728/gacode-simulation:latest
     # config/launch.yaml
-    # priority_class_name: opportunistic 
+    priority_class_name: opportunistic 
     cpu_only: false
 
   cgyro_then_tglf:
     command: >-
-      [](conda init; source ~/.bashrc; conda env create -f environment.yml; conda activate ai-fusion-gacode-simulation; poetry install; make download file=<s3path>;) bash src/run_simulation.sh cgyro <s3path>/cgyro; conda activate omfit-classes-only; python /home/user/ai-fusion-bal-scheduler/src/parse_and_save_outputs.py -d <s3path>/cgyro/../../ -o <s3path>; tar -cJvf <s3path>/cgyro/compressed_outputs.tar.xz <s3path>/cgyro; make upload file=<s3path>/cgyro/compressed_outputs.tar.xz; python format_tglf -s <s3path>/tglf -d <s3path>/tglf/../tglf_simready; bash src/run_simulation.sh tglf <s3path>/tglf/../tglf_simready; make upload file=<s3path>/tglf/../tglf_simready
+      [](conda init; source ~/.bashrc; conda env create -f environment.yml; conda activate ai-fusion-gacode-simulation; poetry install; make download file=<s3path>;) bash src/run_simulation.sh cgyro <s3path>cgyro; conda activate omfit-classes-only; python /home/user/ai-fusion-bal-scheduler/src/parse_and_save_outputs.py -d <s3path>cgyro/../../ -o <s3path>; tar -cJvf <s3path>cgyro/compressed_outputs.tar.xz <s3path>cgyro; make upload file=<s3path>cgyro/compressed_outputs.tar.xz; python format_tglf -s <s3path>tglf -d <s3path>tglf/../tglf_simready; bash src/run_simulation.sh tglf <s3path>tglf/../tglf_simready; make upload file=<s3path>tglf/../tglf_simready
        gpu_count: 0
     gpu_count: 0
     cpu_count: 32

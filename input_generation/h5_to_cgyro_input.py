@@ -421,16 +421,40 @@ def convert_h5_to_batch_dir_batched(
 
 
 # === Run (batched) ===
-if __name__ == "__main__":
-    h5_file = "/Users/wesleyliu/Documents/Github/gacode-docker/out_10k_minmax_norm_rho_0.8_49_50.h5"
-    output_dir = "./cgyro_inputs_fast"
-    convert_h5_to_batch_dir_batched(
-        h5_file,
-        output_dir,
-        batch_size_samples=25,  # tune this up/down based on RAM
-        max_workers=None        # or set explicitly, e.g., 8
+
+def parse_args():
+    import argparse
+    p = argparse.ArgumentParser(
+        description="Batched parallel conversion: HDF5 -> per-sample/per-ky TGLF + CGYRO input directories."
     )
 
+    p.add_argument(
+        "--h5",
+        type=str,
+        required=True,
+        help="Path to input .h5 file."
+    )
+    p.add_argument(
+        "--out",
+        type=str,
+        default="./cgyro_inputs",
+        help="Output root directory."
+    )
+    p.add_argument(
+        "--batch-size",
+        type=int,
+        default=25,
+        help="How many sample indices per batch."
+    )
+    return p.parse_args()
+
+if __name__ == "__main__":
+    args = parse_args()
+    convert_h5_to_batch_dir_batched(
+        h5_path=args.h5,
+        out_root=args.out,
+        batch_size_samples=args.batch_size,
+    )
 
 # # === Run ===
 # h5_file = "/Users/wesleyliu/Documents/Github/gacode-docker/out_52_300_minmax_norm.h5"  # Replace with your actual file path

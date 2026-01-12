@@ -358,15 +358,24 @@ def save_h5(out_path: str, inputs_mat: np.ndarray, ky_mat: np.ndarray, grad_r0: 
         f.attrs["NS"] = GLOBAL_CONST["NS"]
 
 if __name__ == "__main__":
-    npy_file = "/Users/wesleyliu/Documents/Github/gacode-docker/input_generation/samples_by_rho/samples_rho_0.8.npy"
-    grad_r0 = 1.23314445670738
 
-    data = load_npy_or_npz(npy_file)
-    ky_mat, inputs_kept, kept_idx, skipped_idx = compute_ky_matrix_skip_bad(data, grad_r0)
+    # Loop through rho = 0.1, 0.2, ..., 0.9
+    for rho in [round(i, 1) for i in np.arange(0.1, 1.0, 0.1)]:
 
-    print(f"Computed ky for {ky_mat.shape[0]} samples, skipped {len(skipped_idx)}.")
-    print(f"ky shape: {ky_mat.shape}")
+        npy_file = f"/Users/wesleyliu/Documents/Github/gacode-docker/input_generation/samples_by_rho_new/samples_rho_{rho}.npy"
+        grad_r0 = 1.23314445670738  # ❗ or replace with real formula if needed
 
-    out_h5 = "./out_10k_minmax_norm_rho_0.8.h5"
-    save_h5(out_h5, inputs_kept, ky_mat, grad_r0, kept_idx, skipped_idx)
-    print(f"Wrote HDF5: {out_h5}")
+        print(f"\n=== Processing rho={rho} ===")
+        print(f"Loading: {npy_file}")
+
+        data = load_npy_or_npz(npy_file)
+        ky_mat, inputs_kept, kept_idx, skipped_idx = compute_ky_matrix_skip_bad(data, grad_r0)
+
+        print(f"Computed ky for {ky_mat.shape[0]} samples, skipped {len(skipped_idx)}.")
+        print(f"ky shape: {ky_mat.shape}")
+
+        out_h5 = f"./out_10k_minmax_norm_new_dec_rho_{rho}.h5"
+        save_h5(out_h5, inputs_kept, ky_mat, grad_r0, kept_idx, skipped_idx)
+
+        print(f"Wrote HDF5: {out_h5}")
+
