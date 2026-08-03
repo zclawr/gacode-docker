@@ -9,4 +9,4 @@ numa=${5}
 mpinuma=${6}
 
 cd $simdir
-mpiexec --oversubscribe --use-hwthread-cpus -x OMP_NUM_THREADS=$nomp -np $nmpi $exec
+mpiexec --oversubscribe --use-hwthread-cpus --mca btl_vader_single_copy_mechanism none -x OMP_NUM_THREADS=$nomp -np $nmpi $exec
