@@ -7,7 +7,6 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-omfit-classes = { path = "./OMFIT-source/omfit", develop = true }
 numpy = "1.26.4"
 uncertainties = "^3.2.3"
 pexpect = "^4.9.0"
@@ -21,6 +20,8 @@ requests = "^2.32.4"
 boto3 = "^1.38.42"
 s5cmd = "^0.2.0"
 astropy = "^7.1.1"
+h5py = "^3.16.0"
+tqdm = "^4.69.0"
 
 [build-system]
 requires = ["poetry-core"]
