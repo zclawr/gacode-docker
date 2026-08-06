@@ -97,6 +97,7 @@ RUN echo "export GACODE_PLATFORM=LINUX_DOCKER" >> /../../etc/environment && \
     echo "export GACODE_ROOT=/home/user/gacode" >> /../../etc/environment && \
     echo "export export OMPI_ALLOW_RUN_AS_ROOT=1" >> /../../etc/environment && \
     echo "export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1" >> /../../etc/environment && \
+    echo "export OMPI_MCA_btl_vader_single_copy_mechanism=none" >> /../../etc/environment && \
     chmod +x /home/user/run_simulation.sh
 
 # #Compile tglf and cgyro binaries
