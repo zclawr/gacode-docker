@@ -15,7 +15,7 @@ model:
     cpu_count: 32
     ephemeral_storage: 50
     memory: 2
-    image: gitlab-registry.nrp-nautilus.io/wesleyliu728/gacode-simulation:latest
+    image: gitlab-registry.nrp-nautilus.io/zclawrence/gacode-simulation:latest # gitlab-registry.nrp-nautilus.io/wesleyliu728/gacode-simulation:latest
     # config/launch.yaml
     priority_class_name: opportunistic 
     cpu_only: false
