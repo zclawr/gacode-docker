@@ -18,6 +18,12 @@ set -euo pipefail
 # LAYOUT EXPECTED (same as ./cgyro_inputs):
 #  <local-dir>/batch-XXX/{cgyro,tglf}/input-YYY/<inputs + outputs>
 #
+# WHAT GETS PUSHED:
+#  A batch qualifies on its *cgyro* runs: >=1 completed cgyro run means the
+#  batch is pushed.  TGLF is never executed, but its inputs are needed in
+#  post-processing, so every tglf subdirectory of a qualifying batch is
+#  pushed alongside the cgyro results, regardless of completion.
+#
 # S3 LAYOUT PRODUCED:
 #  <prefix>/<DATE_TAG>/batch-XXX/<sim>/input-YYY/...      (raw sync)
 #  <prefix>/<DATE_TAG>/batch-XXX/compressed_outputs.tar.xz (cgyro)
@@ -73,8 +79,8 @@ Usage:   batch_push_simulation_results.sh [tglf|cgyro] path/to/local/dir [option
          Do not build/upload compressed_outputs.tar.xz (cgyro only).
 
          --all
-         Upload every batch, including those with no completed runs.
-         [default: batches with no completed run are skipped]
+         Upload every batch, including those with no completed cgyro runs.
+         [default: batches with no completed cgyro run are skipped]
 
          --dry-run
          Print what would be transferred without writing to S3.
@@ -255,7 +261,7 @@ tar_and_upload_batch () {
   rm -f "$stage_parent/$batch_rel"
 }
 
-# === Push both sim types if present ===
+# === Push qualifying batches (gate on cgyro, always carry tglf along) ===
 n_pushed=0
 n_skipped=0
 n_partial=0
@@ -268,32 +274,43 @@ for batch_dir in "$LOCAL_INPUT_DIR"/batch-*; do
   BATCH_REL="${batch_dir#$LOCAL_INPUT_DIR/}"        # e.g. "batch-000"
   YAML_BATCH_PATH="${S3_BASE}${BATCH_REL}/"         # e.g. "cgyro-inputs.../DATE/batch-000/"
 
-  batch_has_results=false
-
-  for sim in tglf cgyro; do
-    sim_dir="$batch_dir/$sim"
-    [[ -d "$sim_dir" ]] || continue
-
-    # count how many runs in this sim dir actually finished
-    n_total=0
-    for input_dir in "$sim_dir"/input-*; do
+  # Only cgyro decides whether this batch is worth pushing -- tglf is never
+  # run, so it can never make a batch eligible on its own.
+  cgyro_dir="$batch_dir/cgyro"
+  n_total=0
+  n_done=0
+  if [[ -d "$cgyro_dir" ]]; then
+    for input_dir in "$cgyro_dir"/input-*; do
       [[ -d "$input_dir" ]] && n_total=$((n_total + 1))
     done
-    n_done=$(count_completed "$sim" "$sim_dir")
+    n_done=$(count_completed cgyro "$cgyro_dir")
+  fi
 
-    if [[ $n_done -eq 0 && $REQUIRE_COMPLETE -eq 1 ]]; then
-      echo "⏩ Skipping $sim_dir (0/$n_total completed runs; use --all to push anyway)"
-      n_skipped=$((n_skipped + 1))
-      continue
-    fi
-    if [[ $n_done -lt $n_total ]]; then
-      echo "⚠️  $sim_dir: only $n_done/$n_total runs completed"
-      n_partial=$((n_partial + 1))
-    else
-      echo "✅ $sim_dir: $n_done/$n_total runs completed"
-    fi
+  if [[ $n_done -eq 0 && $REQUIRE_COMPLETE -eq 1 ]]; then
+    echo "⏩ Skipping $batch_dir (0/$n_total completed cgyro runs; use --all to push anyway)"
+    n_skipped=$((n_skipped + 1))
+    continue
+  fi
+  if [[ $n_done -lt $n_total ]]; then
+    echo "⚠️  $batch_dir: only $n_done/$n_total cgyro runs completed"
+    n_partial=$((n_partial + 1))
+  else
+    echo "✅ $batch_dir: $n_done/$n_total cgyro runs completed"
+  fi
 
-    batch_has_results=true
+  # cgyro results plus *every* tglf subdirectory of this batch, since
+  # post-processing needs the tglf inputs next to the cgyro outputs.
+  for sim_dir in "$cgyro_dir" "$batch_dir"/tglf*; do
+    [[ -d "$sim_dir" ]] || continue
+    sim="$(basename "$sim_dir")"
+
+    if [[ "$sim" != "cgyro" ]]; then
+      n_tglf=0
+      for input_dir in "$sim_dir"/input-*; do
+        [[ -d "$input_dir" ]] && n_tglf=$((n_tglf + 1))
+      done
+      echo "➕ $sim_dir: carrying $n_tglf tglf input dir(s) along (not run)"
+    fi
 
     if [[ $DO_SYNC -eq 1 ]]; then
       # REL_PATH relative to LOCAL_INPUT_DIR, e.g. "batch-000/cgyro"
@@ -303,24 +320,24 @@ for batch_dir in "$LOCAL_INPUT_DIR"/batch-*; do
     fi
 
     # Manifests reference the *outer* batch dir, as the launch YAML does
-    if [[ "$sim" == "tglf" ]]; then
-      S3PATH_LIST_TGLF+=("\"${YAML_BATCH_PATH}\"")
-    else
+    if [[ "$sim" == "cgyro" ]]; then
       S3PATH_LIST_CGYRO+=("\"${YAML_BATCH_PATH}\"")
+    else
+      S3PATH_LIST_TGLF+=("\"${YAML_BATCH_PATH}\"")
     fi
   done
 
-  # The cgyro job packages the whole batch dir as one archive; do the same.
-  if $batch_has_results && [[ "$RUN_SIM_TYPE" == "cgyro" && $DO_TAR -eq 1 ]]; then
+  # The cgyro job packages the whole batch dir (cgyro + tglf) as one archive.
+  if [[ "$RUN_SIM_TYPE" == "cgyro" && $DO_TAR -eq 1 ]]; then
     tar_and_upload_batch "$batch_dir" "$BATCH_REL"
   fi
 
-  $batch_has_results && n_pushed=$((n_pushed + 1))
+  n_pushed=$((n_pushed + 1))
 done
 shopt -u nullglob
 
 if [[ $n_pushed -eq 0 ]]; then
-  echo "❌ No completed runs found under $LOCAL_INPUT_DIR. Nothing uploaded."
+  echo "❌ No completed cgyro runs found under $LOCAL_INPUT_DIR. Nothing uploaded."
   exit 1
 fi
 
