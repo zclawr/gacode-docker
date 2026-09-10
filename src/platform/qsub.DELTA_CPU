@@ -1,0 +1,70 @@
+#!/bin/bash
+#---------------------------------------------------------------
+# NCSA Delta batch-file generator, sourced by gacode_qsub.
+#
+# Partitions: cpu (max 48:00:00), cpu-interactive (max 00:30:00).
+# Node sharing is the DEFAULT on Delta; a job is charged on whichever
+# is larger, its core fraction or its memory fraction of a
+# 128-core / 256 GB node.  Hence the default memory request below.
+#---------------------------------------------------------------
+
+echo "-queue: cpu, cpu-interactive"
+
+# Default partition
+if [ "$QUEUE" == "null_queue" ] ; then
+   QUEUE=cpu
+fi
+
+# Account.  gacode_qsub only auto-detects at NERSC (iris) and ORNL
+# (showusage), so resolve a Delta allocation here.
+if [ -z "$REPO" ] || [ "$REPO" == "null_repo" ] ; then
+   if [ -n "$SLURM_ACCOUNT" ] ; then
+      REPO=$SLURM_ACCOUNT
+   elif hash accounts 2> /dev/null ; then
+      REPO=`accounts 2>/dev/null | grep -o '[a-z0-9]*-delta-cpu' | head -n 1`
+   fi
+   if [ -z "$REPO" ] ; then
+      REPO=`sacctmgr -nP show assoc user=$USER format=Account 2>/dev/null | grep -- '-delta-cpu' | head -n 1`
+   fi
+   if [ -z "$REPO" ] ; then
+      echo "WARNING: (qsub.DELTA_CPU) No Delta account found."
+      echo "         Pass -repo <name>-delta-cpu or export SLURM_ACCOUNT."
+      REPO=null_repo
+   fi
+fi
+
+# A Delta CPU node has 2 GB per core.  Asking for slightly less keeps
+# the memory fraction below the core fraction (and stays under the
+# node's usable RealMemory), so the job is charged on cores.
+DELTA_MEM_PER_CPU=${DELTA_MEM_PER_CPU:-1900M}
+
+bfile=$SIMDIR/batch.src
+
+echo "#!/bin/bash -l" > $bfile
+echo "#SBATCH -J $LOCDIR" >> $bfile
+echo "#SBATCH -A $REPO" >> $bfile
+echo "#SBATCH -p $QUEUE" >> $bfile
+echo "#SBATCH -o $SIMDIR/batch.out" >> $bfile
+echo "#SBATCH -e $SIMDIR/batch.err" >> $bfile
+echo "#SBATCH -t $WALLTIME" >> $bfile
+echo "#SBATCH -N $nodes" >> $bfile
+echo "#SBATCH -n $nmpi" >> $bfile
+echo "#SBATCH -c $nomp" >> $bfile
+if [ "$DELTA_EXCLUSIVE" == "1" ] ; then
+   # Whole nodes: all memory available, charged for all cores.
+   echo "#SBATCH --exclusive" >> $bfile
+elif [ -n "$MEMPERNODE" ] ; then
+   echo "#SBATCH --mem=$MEMPERNODE" >> $bfile
+elif [ -n "$MEMPERCPU" ] ; then
+   echo "#SBATCH --mem-per-cpu=$MEMPERCPU" >> $bfile
+else
+   echo "#SBATCH --mem-per-cpu=$DELTA_MEM_PER_CPU" >> $bfile
+fi
+echo "" >> $bfile
+# gacode_setup does not source platform/env, so do it here.
+echo "export GACODE_ROOT=$GACODE_ROOT" >> $bfile
+echo "export GACODE_PLATFORM=$GACODE_PLATFORM" >> $bfile
+echo '. $GACODE_ROOT/platform/env/env.$GACODE_PLATFORM' >> $bfile
+echo '. $GACODE_ROOT/shared/bin/gacode_setup' >> $bfile
+echo "" >> $bfile
+echo "$CODE -e $LOCDIR -n $nmpi -nomp $nomp -numa $numa -mpinuma $mpinuma -p $SIMROOT" >> $bfile
