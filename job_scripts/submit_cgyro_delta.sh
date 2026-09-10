@@ -13,10 +13,13 @@
 #
 # DELTA SPECIFICS:
 #  - CPU nodes: 2 x AMD EPYC 7763, 128 cores, 256 GB (2 GB/core), 8 NUMAs
-#  - partitions: cpu (48 h max), cpu-interactive (30 min) -- "-p", not "-q"
+#  - partitions: cpu (48 h max), cpu-interactive (1 h, 4 nodes),
+#    cpu-preempt (48 h, half charge) -- "-p", not "-q"
 #  - node-sharing is the DEFAULT; jobs are charged on whichever is larger,
 #    the core fraction or the memory fraction, so --mem is always set
 #  - no "-C cpu" constraint, and no iris-style account auto-detection
+#  - Cray PE machine since the 2025 RHEL 9 upgrade: cray-mpich launched
+#    with srun (there is no mpirun), see platform/env/env.DELTA_CPU
 #
 # LAYOUT EXPECTED:
 #  <input-root>/batch-XXX/cgyro/input-YYY/input.cgyro
@@ -60,7 +63,8 @@ MEM_PER_CORE_MB=1900
 
 # Partition wallclock ceilings (informational check only)
 MAX_WALL_cpu=48:00:00
-MAX_WALL_cpu_interactive=00:30:00
+MAX_WALL_cpu_interactive=01:00:00
+MAX_WALL_cpu_preempt=48:00:00
 
 usage () {
   cat <<'EOF'
@@ -86,10 +90,12 @@ Usage:   submit_cgyro_delta.sh [options]
 
          -w <wallclock>
          Wallclock limit per job.  [default: 0:15:00]
-         Partition cpu allows up to 48:00:00, cpu-interactive 00:30:00.
+         Partition cpu allows up to 48:00:00, cpu-interactive 01:00:00,
+         cpu-preempt 48:00:00.
 
          -queue <name>  (alias: -partition)
-         Slurm partition: cpu, cpu-interactive.  [default: cpu]
+         Slurm partition: cpu, cpu-interactive, cpu-preempt.
+         [default: cpu]
 
          -account <name>  (alias: -repo)
          Delta account/allocation, e.g. bbxx-delta-cpu.  Taken from
@@ -182,8 +188,9 @@ SIMROOT=$(cd "$INPUT_ROOT" && pwd)
 case "$PARTITION" in
    cpu)             MAXWALL=$MAX_WALL_cpu ;;
    cpu-interactive) MAXWALL=$MAX_WALL_cpu_interactive ;;
+   cpu-preempt)     MAXWALL=$MAX_WALL_cpu_preempt ;;
    *) echo "WARNING: (submit_cgyro_delta.sh) Unrecognised partition '$PARTITION'."
-      echo "         Known CPU partitions: cpu, cpu-interactive."
+      echo "         Known CPU partitions: cpu, cpu-interactive, cpu-preempt."
       MAXWALL= ;;
 esac
 

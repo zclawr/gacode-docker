@@ -2,13 +2,15 @@
 #---------------------------------------------------------------
 # NCSA Delta batch-file generator, sourced by gacode_qsub.
 #
-# Partitions: cpu (max 48:00:00), cpu-interactive (max 00:30:00).
+# Partitions: cpu (max 48:00:00), cpu-interactive (max 01:00:00,
+# 4 nodes), cpu-preempt (max 48:00:00, half charge, checkpointing
+# codes only).
 # Node sharing is the DEFAULT on Delta; a job is charged on whichever
 # is larger, its core fraction or its memory fraction of a
 # 128-core / 256 GB node.  Hence the default memory request below.
 #---------------------------------------------------------------
 
-echo "-queue: cpu, cpu-interactive"
+echo "-queue: cpu, cpu-interactive, cpu-preempt"
 
 # Default partition
 if [ "$QUEUE" == "null_queue" ] ; then

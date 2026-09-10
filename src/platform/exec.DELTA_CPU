@@ -1,8 +1,8 @@
 #! /usr/bin/env bash
 # GACODE Parallel execution script -- NCSA Delta (CPU partition)
 #
-# OpenMPI 4.1.6 launched through srun.  Delta is not a Cray machine, so
-# no MPICH_* variables are set here.
+# Delta runs the Cray PE with cray-mpich, which is launched exclusively
+# through srun: NCSA does not provide mpirun on the system.
 
 simdir=${1}
 nmpi=${2}
@@ -27,32 +27,14 @@ if [ "$nomp" -gt 1 ] ; then
    export OMP_PROC_BIND=close
 fi
 
+# cray-mpich settings: threads only call MPI from the master thread, and
+# this is a CPU-only build so no GPU-aware path is needed.
+export MPICH_MAX_THREAD_SAFETY=funneled
+export MPICH_GPU_SUPPORT_ENABLED=0
+
 export SLURM_CPU_BIND="cores"
 ulimit -c unlimited
 ulimit -s unlimited 2> /dev/null
 
-# Set GACODE_MPI_LAUNCH=mpirun to bypass srun/PMIx.
-launch=${GACODE_MPI_LAUNCH:-srun}
-
-if [ "$launch" = "srun" ] && [ -n "$SLURM_JOB_ID" ] ; then
-
-   opt="--cpu-bind=cores -n $nmpi -c $nomp"
-
-   # OpenMPI bootstraps through PMIx under srun; ask for it explicitly
-   # when this Slurm build offers it.
-   if srun --mpi=list 2>&1 | grep -qi pmix ; then
-      opt="--mpi=pmix $opt"
-   fi
-
-   echo "> srun $opt $exec"
-   srun $opt $exec
-
-else
-
-   # Interactive / non-Slurm fallback.  PE=$nomp reserves $nomp cores
-   # per rank and round-robins ranks over the two sockets.
-   echo "> mpirun -np $nmpi --map-by socket:PE=$nomp --bind-to core $exec"
-   mpirun -np $nmpi --map-by socket:PE=$nomp --bind-to core \
-          -x OMP_NUM_THREADS -x OMP_STACKSIZE $exec
-
-fi
+echo "> srun --cpu-bind=cores -n $nmpi -c $nomp $exec"
+srun --cpu-bind=cores -n $nmpi -c $nomp $exec
